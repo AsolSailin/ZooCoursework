@@ -261,12 +261,17 @@ public partial class AnimalsZooContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Patronymic)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.RoleId).HasColumnName("Role_Id");
+            entity.Property(e => e.Surname)
+                .HasMaxLength(50)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_User_Role");
+                .HasConstraintName("FK_User_Role1");
         });
 
         modelBuilder.Entity<UserAviary>(entity =>
