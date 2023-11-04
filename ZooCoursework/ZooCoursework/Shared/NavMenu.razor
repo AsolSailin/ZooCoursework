@@ -1,29 +1,28 @@
-﻿<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink Class="nav-link" Href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Страница 1
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink Class="nav-link" Href="/billing" Disabled="true">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 2
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <MudNavGroup Title="Settings" Expanded="true">
-                <MudNavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 3
-                </MudNavLink>
-                <MudNavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 4
-                </MudNavLink>
-            </MudNavGroup>
-        </div>
-    </nav>
-</div>
+﻿<style>
+    .text{
+        color: #21A77F;
+    }
+</style>
+
+<MudNavMenu>
+    <MudNavLink Class="text" Href="counter">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 1
+    </MudNavLink>
+    <MudNavLink Class="text" Href="/billing" Disabled="true">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 2
+    </MudNavLink>
+    <MudNavGroup Title="Страницы" Expanded="@isExpanded" ExpandedChanged="() => isExpanded = !isExpanded" Class="text">
+        <MudNavLink class="text" href="fetchdata">
+            <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 3
+        </MudNavLink>
+        <MudNavLink class="text" href="fetchdata">
+            <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 4
+        </MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>
 
 @code {
+    private bool isExpanded = true;
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
