@@ -1,5 +1,75 @@
-﻿<h3>AuthorizationPage</h3>
+﻿@page "/authorization"
+
+<style>
+    .paper {
+        position: absolute;
+        left: 180px;
+        top: 100px;
+        width: 1000px;
+        height: 550px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+    }
+    
+    .img {
+        width: 400px;
+        height: 400px;
+    }
+
+    .mainLabel {
+        text-align: center;
+        margin-right: 90px;
+        margin-bottom: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+
+    .labelText {
+        font-size: 30px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        margin-left: 7px;
+    }
+
+    .href {
+        color: #5FCEAD;
+        text-decoration: underline;
+    }
+
+        .href:hover {
+            color: #21A77F;
+        }
+</style>
+
+<MudPaper Class="paper">
+    <div class="mainBlock"> 
+        <div class="imgBlock">
+            <MudImage Src="/images/Лого.png" Class="img"></MudImage>
+        </div>
+        <div class="fieldsBlock">
+            <MudText Class="mainLabel">АВТОРИЗАЦИЯ</MudText>
+            <div>
+                <MudText Class="labelText">Логин</MudText>
+                <input @bind-value=login />
+            </div>
+            <div>
+                <MudText Class="labelText">Пароль</MudText>
+                <input @bind-value=login />
+            </div>
+            <div class="btnBlock">
+                <button class="btn">ВОЙТИ</button>
+                <p class="alignment">Нет аккаунта?<NavLink href="" class="href">Зарегистрируйся</NavLink></p>
+            </div>
+        </div>
+    </div>
+</MudPaper>
 
 @code {
-
+    string login = "";
+    string password = "";
 }

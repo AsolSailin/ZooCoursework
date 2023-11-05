@@ -7,7 +7,7 @@
         background-image: linear-gradient(180deg, #21A77F 0%, #5FCEAD 70%);
     }
 
-    .img{
+    .logo{
         width: 50px;
         height: 50px;
     }
@@ -25,7 +25,7 @@
     </MudAppBar>
     <MudDrawer @bind-Open="@open" Breakpoint="Breakpoint.Xxl" ClipMode="DrawerClipMode.Never" Variant="@DrawerVariant.Responsive" >
         <MudDrawerHeader>
-            <MudImage Src="/images/Лого.png" Class="img"></MudImage><MudText Typo="Typo.h6" Class="text">САФАРИ</MudText>
+            <MudImage Src="/images/Лого.png" Class="logo"></MudImage><MudText Typo="Typo.h6" Class="text">САФАРИ</MudText>
         </MudDrawerHeader>
         <MudNavMenu>
             <NavMenu />
@@ -38,12 +38,28 @@
     </MudMainContent>
 </MudLayout>
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_currentTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 @code {
     bool open = false;
+
+    private readonly MudTheme _currentTheme = new()
+        {
+            Palette = new PaletteLight
+            {
+                TextSecondary = "#21A77F",
+                //Primary = "#111111",
+                //Secondary = "#111111",
+                //Info = "#111111",
+                //Success = "#111111",
+                //Warning = "#111111",
+                //Error = "#111111",
+                //AppbarBackground = "#111111",
+                //TextPrimary = "#111111",
+            }
+        };
 
     void ToggleDrawer()
     {

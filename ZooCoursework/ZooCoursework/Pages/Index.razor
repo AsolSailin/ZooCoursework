@@ -1,2 +1,10 @@
 ﻿@page "/"
+@inject NavigationManager navigation
+
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        navigation.NavigateTo("/authorization");
+    }
+}
 
