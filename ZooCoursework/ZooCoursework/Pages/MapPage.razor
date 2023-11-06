@@ -1,4 +1,38 @@
-﻿<h3>MapPage</h3>
+﻿@page "/map"
+
+<style>
+    .paper {
+        position: absolute;
+        left: 180px;
+        top: 100px;
+        width: 1000px;
+        height: 550px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+    }
+
+    .mainDiv {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .mapImg{
+        text-align: center;
+        height: 500px;
+        width: 870px;
+        border-radius: 10px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <div class="mainDiv">
+        <MudImage Src="/images/Карта.png" Class="mapImg"></MudImage>
+    </div>
+</MudPaper>
 
 @code {
 
