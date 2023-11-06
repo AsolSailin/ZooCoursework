@@ -1,5 +1,7 @@
 ﻿@page "/authorization"
 
+<PageTitle>АВТОРИЗАЦИЯ</PageTitle>
+
 <style>
     .paper {
         position: absolute;
@@ -55,11 +57,11 @@
             <MudText Class="mainLabel">АВТОРИЗАЦИЯ</MudText>
             <div>
                 <MudText Class="labelText">Логин</MudText>
-                <input @bind-value=login />
+                <input @bind-value="login" />
             </div>
             <div>
                 <MudText Class="labelText">Пароль</MudText>
-                <input @bind-value=login />
+                <input @bind-value="password" />
             </div>
             <div class="btnBlock">
                 <button class="btn">ВОЙТИ</button>
