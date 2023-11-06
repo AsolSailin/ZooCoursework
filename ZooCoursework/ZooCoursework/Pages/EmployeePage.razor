@@ -1,5 +1,91 @@
-﻿<h3>EmployeePage</h3>
+﻿@page "/employee_page"
+
+<PageTitle>АККАУНТ СОТРУДНИКА</PageTitle>
+
+<style>
+    .paper {
+        position: absolute;
+        left: 180px;
+        top: 100px;
+        width: 1000px;
+        height: 550px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+    }
+
+    .mainLabel {
+        text-align: center;
+        margin-right: 90px;
+        margin-bottom: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+
+    .labelText {
+        font-size: 25px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        margin-left: 7px;
+    }
+
+    .href {
+        color: #5FCEAD;
+        text-decoration: underline;
+    }
+
+        .href:hover {
+            color: #21A77F;
+        }
+
+    .fieldsBlock {
+        flex: 50%;
+        margin-bottom: 30px;
+        margin-left: 50px;
+    }
+
+    .imgBlock {
+        flex: 50%;
+        text-align: center;
+        margin-left: 50px;
+        width: 400px;
+        height: 400px;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <div class="mainBlock">
+        <div class="imgBlock">
+            <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="/images/Лого.png"></MudAvatar>
+        </div>
+        <div class="fieldsBlock">
+            <div>
+                <MudText Class="labelText">Фамилия</MudText>
+                <input @bind-value="surname" />
+            </div>
+            <div>
+                <MudText Class="labelText">Имя</MudText>
+                <input @bind-value="name" />
+            </div>
+            <div>
+                <MudText Class="labelText">Отчество</MudText>
+                <input @bind-value="patronymic" />
+            </div>
+            <div>
+                <MudText Class="labelText">Должность</MudText>
+                <input @bind-value="post" />
+            </div>
+        </div>
+    </div>
+</MudPaper>
 
 @code {
-
+    string surname = "";
+    string name = "";
+    string patronymic = "";
+    string post = "";
 }
