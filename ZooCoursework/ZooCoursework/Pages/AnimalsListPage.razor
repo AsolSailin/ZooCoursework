@@ -1,5 +1,73 @@
-﻿<h3>AnimalsListPage</h3>
+﻿@page "/animals_list"
+@using ZooCoursework.DataBase
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+
+<style>
+    .mainLabel {
+        text-align: center;
+        margin-right: 90px;
+        margin-bottom: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+
+    .labelText {
+        font-size: 25px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-left: 7px;
+        text-align: center;
+    }
+
+    .imgBlock {
+        flex: 50%;
+        text-align: center;
+        margin-left: 100px;
+        width: 400px;
+        height: 400px;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <MudGrid Spacing="@spacing" Justify="Justify.FlexStart" 
+    Style="position: absolute;
+        left: 190px;
+        top: 100px;
+        width: 1000px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+    }">
+        @foreach (var animal in animals)
+        {
+            <MudItem>
+                <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none;">
+                    <a href="/" @onclick="() => GetAnimal(animal)">
+                        <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
+                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
+                            <MudText Class="labelText">@animal.Name</MudText>
+                        </MudPaper>
+                    </a>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+</MudPaper>
 
 @code {
+    public int spacing { get; set; } = 5;
+    private List<Animal> animals = new List<Animal>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        animals = ZooContext.Animals.ToList();
+    }
+
+    public void GetAnimal(Animal animal)
+    {
+        //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+    }
 }

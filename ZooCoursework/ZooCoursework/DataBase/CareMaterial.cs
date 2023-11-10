@@ -9,5 +9,9 @@ public partial class CareMaterial
 
     public string Name { get; set; } = null!;
 
+    public int? TypeId { get; set; }
+
     public virtual ICollection<AnimalMaterial> AnimalMaterials { get; set; } = new List<AnimalMaterial>();
+
+    public virtual MaterialType? Type { get; set; }
 }

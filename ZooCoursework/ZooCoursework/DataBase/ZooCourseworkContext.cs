@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ZooCoursework.DataBase;
 
-public partial class AnimalsZooContext : DbContext
+public partial class ZooCourseworkContext : DbContext
 {
-    public AnimalsZooContext()
+    public ZooCourseworkContext()
     {
     }
 
-    public AnimalsZooContext(DbContextOptions<AnimalsZooContext> options)
+    public ZooCourseworkContext(DbContextOptions<ZooCourseworkContext> options)
         : base(options)
     {
     }
@@ -33,6 +33,8 @@ public partial class AnimalsZooContext : DbContext
 
     public virtual DbSet<CoolingMethod> CoolingMethods { get; set; }
 
+    public virtual DbSet<MaterialType> MaterialTypes { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -49,7 +51,7 @@ public partial class AnimalsZooContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-80QITHSR\\SQLEXPRES;Initial Catalog=AnimalsZoo;Integrated Security=True; TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-80QITHSR\\SQLEXPRES;Initial Catalog=ZooCoursework;Integrated Security=True; TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -174,6 +176,11 @@ public partial class AnimalsZooContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.TypeId).HasColumnName("Type_Id");
+
+            entity.HasOne(d => d.Type).WithMany(p => p.CareMaterials)
+                .HasForeignKey(d => d.TypeId)
+                .HasConstraintName("FK_CareMaterial_MaterialType");
         });
 
         modelBuilder.Entity<ConditionAccommodation>(entity =>
@@ -193,6 +200,16 @@ public partial class AnimalsZooContext : DbContext
             entity.ToTable("CoolingMethod");
 
             entity.Property(e => e.CoolingFacility)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MaterialType>(entity =>
+        {
+            entity.ToTable("MaterialType");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });
