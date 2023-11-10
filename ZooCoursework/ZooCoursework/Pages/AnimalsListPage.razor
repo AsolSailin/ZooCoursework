@@ -32,22 +32,37 @@
     }
 </style>
 
-<MudPaper Class="paper">
+<div style="position: absolute; display: flex;">
+    <div style="flex:50%">
+        <MudSelect Label="Вид животных" Variant="Variant.Outlined" @bind-Value="currentKind" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+            @foreach (var kind in kinds)
+            {
+                <MudSelectItem Value="@(kind.Name)" />
+            }
+        </MudSelect>
+    </div>
+    <div style="flex:50%">
+        <MudButton Variant="Variant.Outlined" Style="width: 96%; height: 60px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F" OnClick="Add">Добавить животное</MudButton>
+    </div>
+</div>
+
+<div style="position:absolute">
     <MudGrid Spacing="@spacing" Justify="Justify.FlexStart" 
     Style="position: absolute;
         left: 190px;
         top: 100px;
         width: 1000px;
         box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        border-radius: 30px;
         background-color: #EEFFF7;
     }">
         @foreach (var animal in animals)
         {
             <MudItem>
-                <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none;">
+                <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a href="/" @onclick="() => GetAnimal(animal)">
-                        <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
-                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
+                        <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
                             <MudText Class="labelText">@animal.Name</MudText>
                         </MudPaper>
                     </a>
@@ -55,19 +70,30 @@
             </MudItem>
         }
     </MudGrid>
-</MudPaper>
+</div>
 
 @code {
     public int spacing { get; set; } = 5;
     private List<Animal> animals = new List<Animal>();
 
+    List<AnimalKind> kinds = new List<AnimalKind>();
+    private static readonly AnimalKind _allKinds = new AnimalKind() { Name = "Все" };
+    string currentKind = "";
+
     protected override async Task OnInitializedAsync()
     {
+        kinds = ZooContext.AnimalKinds.ToList();
+        kinds.Add(_allKinds);
         animals = ZooContext.Animals.ToList();
     }
 
     public void GetAnimal(Animal animal)
     {
         //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+    }
+
+    public void Add()
+    {
+        
     }
 }

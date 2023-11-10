@@ -32,9 +32,18 @@
     }
 </style>
 
-<MudPaper>
+<div style="position:absolute">
+    <MudSelect Label="Должность" Variant="Variant.Outlined" @bind-Value="currentUser" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+        @foreach (var role in roles)
+        {
+            <MudSelectItem Value="@(role.Name)" />
+        }
+    </MudSelect>
+</div>
+
+<div style="position:absolute">
     <MudGrid Spacing="@spacing" Justify="Justify.FlexStart"
-             Style="position: absolute;
+                Style="position: absolute;
         left: 190px;
         top: 100px;
         width: 1000px;
@@ -57,15 +66,20 @@
             </MudItem>
         }
     </MudGrid>
-</MudPaper>
+</div>
 
 @code {
     public int spacing { get; set; } = 5;
     private List<User> users = new List<User>();
+    List<Role> roles = new List<Role>();
+    private static readonly Role _allRoles = new Role() { Name = "Все" };
+    string currentUser = "";
 
     protected override async Task OnInitializedAsync()
     {
-        users = ZooContext.Users.ToList();
+        roles = ZooContext.Roles.ToList();
+        roles.Add(_allRoles);
+        users = ZooContext.Users.Where(x => x.Id != 1).ToList();
     }
 
     public void GetUser(User user)

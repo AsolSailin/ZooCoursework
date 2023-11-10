@@ -32,9 +32,18 @@
     }
 </style>
 
-<MudPaper Class="paper">
+<div style="position:absolute">
+    <MudSelect Label="Вид материала" Variant="Variant.Outlined" @bind-Value="currentType" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+        @foreach (var type in types)
+        {
+            <MudSelectItem Value="@(type.Name)" />
+        }
+    </MudSelect>
+</div>
+
+<div style="position:absolute">
     <MudGrid Spacing="@spacing" Justify="Justify.FlexStart"
-             Style="position: absolute;
+                Style="position: absolute;
         left: 190px;
         top: 100px;
         width: 1000px;
@@ -55,14 +64,19 @@
             </MudItem>
         }
     </MudGrid>
-</MudPaper>
+</div>
 
 @code {
     public int spacing { get; set; } = 5;
     private List<CareMaterial> materials = new List<CareMaterial>();
+    List<MaterialType> types = new List<MaterialType>();
+    private static readonly MaterialType _allTypes = new MaterialType() { Name = "Все" };
+    string currentType = "";
 
     protected override async Task OnInitializedAsync()
     {
+        types = ZooContext.MaterialTypes.ToList();
+        types.Add(_allTypes);
         materials = ZooContext.CareMaterials.ToList();
     }
 
