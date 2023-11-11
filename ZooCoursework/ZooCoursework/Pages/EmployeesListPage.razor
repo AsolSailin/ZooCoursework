@@ -32,13 +32,14 @@
     }
 </style>
 
-<div style="position:absolute">
-    <MudSelect Label="Должность" Variant="Variant.Outlined" @bind-Value="currentUser" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+<div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
+    <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="currentRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
         @foreach (var role in roles)
         {
             <MudSelectItem Value="@(role.Name)" />
         }
     </MudSelect>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Добавить сотрудника</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -69,21 +70,41 @@
 </div>
 
 @code {
-    public int spacing { get; set; } = 5;
+    private int spacing { get; set; } = 5;
     private List<User> users = new List<User>();
-    List<Role> roles = new List<Role>();
+
+    private List<Role> roles = new List<Role>();
     private static readonly Role _allRoles = new Role() { Name = "Все" };
-    string currentUser = "";
+    private string currentRole = "Все";
 
     protected override async Task OnInitializedAsync()
     {
         roles = ZooContext.Roles.ToList();
         roles.Add(_allRoles);
-        users = ZooContext.Users.Where(x => x.Id != 1).ToList();
+        users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
     }
 
-    public void GetUser(User user)
+    private void GetRole(string selected)
+    {
+        currentRole = selected;
+
+        if (currentRole == "Все")
+        {
+            users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
+            return;
+        }
+
+        var roleId = ZooContext.Roles.FirstOrDefault(x => x.Name == currentRole).Id;
+        users = ZooContext.Users.Where(x => x.RoleId == roleId).ToList();
+    }
+
+    private void GetUser(User user)
     {
         //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+    }
+
+    private void Add()
+    {
+        
     }
 }

@@ -32,13 +32,14 @@
     }
 </style>
 
-<div style="position:absolute">
-    <MudSelect Label="Вид материала" Variant="Variant.Outlined" @bind-Value="currentType" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+<div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
+    <MudSelect T="string" Label="Вид материал" Variant="Variant.Outlined" ValueChanged="GetType" Value="currentType" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
         @foreach (var type in types)
         {
             <MudSelectItem Value="@(type.Name)" />
         }
     </MudSelect>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Заказать материалы</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -67,11 +68,12 @@
 </div>
 
 @code {
-    public int spacing { get; set; } = 5;
+    private int spacing { get; set; } = 5;
     private List<CareMaterial> materials = new List<CareMaterial>();
-    List<MaterialType> types = new List<MaterialType>();
+
+    private List<MaterialType> types = new List<MaterialType>();
     private static readonly MaterialType _allTypes = new MaterialType() { Name = "Все" };
-    string currentType = "";
+    private string currentType = "Все";
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,8 +82,27 @@
         materials = ZooContext.CareMaterials.ToList();
     }
 
-    public void GetMaterial(CareMaterial material)
+    private void GetType(string selected)
+    {
+        currentType = selected;
+
+        if (currentType == "Все")
+        {
+            materials = ZooContext.CareMaterials.ToList();
+            return;
+        }
+
+        var typeId = ZooContext.MaterialTypes.FirstOrDefault(x => x.Name == currentType).Id;
+        materials = ZooContext.CareMaterials.Where(x => x.TypeId == typeId).ToList();
+    }
+
+    private void GetMaterial(CareMaterial material)
     {
         //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+    }
+
+    private void Add ()
+    {
+        
     }
 }

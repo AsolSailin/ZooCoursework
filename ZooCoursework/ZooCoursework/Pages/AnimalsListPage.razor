@@ -32,18 +32,16 @@
     }
 </style>
 
-<div style="position: absolute; display: flex;">
-    <div style="flex:50%">
-        <MudSelect Label="Вид животных" Variant="Variant.Outlined" @bind-Value="currentKind" Style="border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; left: 170px;">
+<div style="position: absolute;
+        left: 190px;
+        width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
+    <MudSelect T="string" Label="Вид животных" Variant="Variant.Outlined" ValueChanged="GetKind" Value="currentKind" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
             @foreach (var kind in kinds)
             {
                 <MudSelectItem Value="@(kind.Name)" />
             }
-        </MudSelect>
-    </div>
-    <div style="flex:50%">
-        <MudButton Variant="Variant.Outlined" Style="width: 96%; height: 60px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F" OnClick="Add">Добавить животное</MudButton>
-    </div>
+    </MudSelect>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Добавить животное</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -73,12 +71,12 @@
 </div>
 
 @code {
-    public int spacing { get; set; } = 5;
+    private int spacing { get; set; } = 5;
     private List<Animal> animals = new List<Animal>();
 
-    List<AnimalKind> kinds = new List<AnimalKind>();
+    private List<AnimalKind> kinds = new List<AnimalKind>();
     private static readonly AnimalKind _allKinds = new AnimalKind() { Name = "Все" };
-    string currentKind = "";
+    private string currentKind = "Все";
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,12 +85,26 @@
         animals = ZooContext.Animals.ToList();
     }
 
-    public void GetAnimal(Animal animal)
+    private void GetKind(string selected)
+    {
+        currentKind = selected;
+
+        if(currentKind == "Все")
+        {
+            animals = ZooContext.Animals.ToList();
+            return;
+        }
+
+        var kindId = ZooContext.AnimalKinds.FirstOrDefault(x => x.Name == currentKind).Id;
+        animals = ZooContext.Animals.Where(x => x.KindId == kindId).ToList();
+    }
+
+    private void GetAnimal(Animal animal)
     {
         //Navigation.NavigateTo($"/animal_info/{animal.Id}");
     }
 
-    public void Add()
+    private void Add()
     {
         
     }
