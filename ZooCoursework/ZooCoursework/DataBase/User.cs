@@ -13,11 +13,11 @@ public partial class User
 
     public string? Patronymic { get; set; }
 
-    public int? RoleId { get; set; }
+    public int RoleId { get; set; }
 
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
-    public virtual Role? Role { get; set; }
+    public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
-    public virtual ICollection<UserAviary> UserAviaries { get; set; } = new List<UserAviary>();
+    public virtual Role Role { get; set; } = null!;
 }

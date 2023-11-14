@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMudServices();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<AuthorizationService>();
+builder.Services.AddSingleton<CurrentElementServise>();
 
 builder.Services.AddDbContext<ZooCoursework.DataBase.ZooCourseworkContext>(options =>
 {

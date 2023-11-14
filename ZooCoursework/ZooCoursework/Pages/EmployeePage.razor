@@ -1,4 +1,8 @@
-﻿@page "/employee_page"
+﻿@page "/employee_page/{currentEmployeeId}"
+@using ZooCoursework.DataBase
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <PageTitle>АККАУНТ СОТРУДНИКА</PageTitle>
 
@@ -65,27 +69,34 @@
         <div class="fieldsBlock">
             <div>
                 <MudText Class="labelText">Фамилия</MudText>
-                <input @bind-value="surname" />
+                <input @bind-value="currentUser.Surname" />
             </div>
             <div>
                 <MudText Class="labelText">Имя</MudText>
-                <input @bind-value="name" />
+                <input @bind-value="currentUser.Name" />
             </div>
             <div>
                 <MudText Class="labelText">Отчество</MudText>
-                <input @bind-value="patronymic" />
+                <input @bind-value="currentUser.Patronymic" />
             </div>
             <div>
                 <MudText Class="labelText">Должность</MudText>
-                <input @bind-value="post" />
+                <input @bind-value="role" />
             </div>
         </div>
     </div>
 </MudPaper>
 
 @code {
-    string surname = "";
-    string name = "";
-    string patronymic = "";
-    string post = "";
+    [Parameter]
+    public string? currentEmployeeId { get; set; }
+
+    private string role = "";
+    private User currentUser = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = ZooContext.Users.FirstOrDefault(x => x.Id == int.Parse(currentEmployeeId));
+        role = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId).Title;
+    }
 }

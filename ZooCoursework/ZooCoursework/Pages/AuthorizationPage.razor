@@ -5,7 +5,7 @@
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
-@inject AuthorizationService AuthorizationService
+@inject CurrentElementServise CurrentElement
 
 <PageTitle>АВТОРИЗАЦИЯ</PageTitle>
 
@@ -115,8 +115,8 @@
             return;
         }
 
-        AuthorizationService.CurrentAccount = accountDb;
-        AuthorizationService.CurrentUser = ZooContext.Users.FirstOrDefault(x => x.Id == accountDb.UserId);
+        CurrentElement.CurrentAccount = accountDb;
+        CurrentElement.CurrentUser = ZooContext.Users.FirstOrDefault(x => x.Id == accountDb.UserId);
 
         Navigation.NavigateTo("/map");
     }

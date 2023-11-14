@@ -1,4 +1,8 @@
-﻿@page "/animal_page"
+﻿@page "/animal_page/{currentAnimalId}"
+@using ZooCoursework.DataBase
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <PageTitle>ПАСПОРТ ЖИВОТНОГО</PageTitle>
 
@@ -55,11 +59,11 @@
         <div class="fieldsBlock">
             <div>
                 <MudText Class="labelText">Имя</MudText>
-                <input @bind-value="name" />
+                <input @bind-value="currentAnimal.Name" />
             </div>
             <div>
                 <MudText Class="labelText">Возраст</MudText>
-                <input @bind-value="age" />
+                <input @bind-value="@date"/>
             </div>
             <div>
                 <MudText Class="labelText">Вид</MudText>
@@ -67,15 +71,28 @@
             </div>
             <div>
                 <MudText Class="labelText">Вольер</MudText>
-                <input @bind-value="aviary" />
+                <input @bind-value="aviary.Title" />
             </div>
         </div>
     </div>
 </MudPaper>
 
 @code {
-    string name = "";
-    string age = "";
-    string kind = "";
-    string aviary = "";
+    [Parameter]
+    public string? currentAnimalId { get; set; }
+
+    private string kind = "";
+    private string date = "";
+    private Aviary aviary = new Aviary();
+    private Animal currentAnimal = new Animal();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentAnimal = ZooContext.Animals.FirstOrDefault(x => x.Id == int.Parse(currentAnimalId));
+        aviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == currentAnimal.AviaryId);
+        kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == aviary.KindId).Title;
+
+        date = currentAnimal.BirthDate.ToString("d");
+    }
 }
+

@@ -1,5 +1,110 @@
-﻿<h3>AviaryPage</h3>
+﻿@page "/aviary_page/{currentAviaryId}"
+@using ZooCoursework.DataBase
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>ПАСПОРТ ЖИВОТНОГО</PageTitle>
+
+<style>
+    .paper {
+        position: absolute;
+        left: 180px;
+        top: 100px;
+        width: 1000px;
+        height: 550px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+    }
+
+    .mainLabel {
+        text-align: center;
+        margin-right: 90px;
+        margin-bottom: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+
+    .labelText {
+        font-size: 25px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        margin-left: 7px;
+    }
+
+    .fieldsBlock {
+        flex: 50%;
+        margin-bottom: 30px;
+        margin-left: 50px;
+    }
+
+    .listBlock {
+        flex: 50%;
+        text-align: center;
+        margin-left: 50px;
+        width: 400px;
+        height: 400px;
+    }
+
+    .mainLabel {
+        text-align: center;
+        margin-left: 50px;
+        margin-top: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <div>
+        <MudText Class="mainLabel">@currentAviary.Title</MudText>
+    </div>
+    <div class="mainBlock">
+        <div class="fieldsBlock">
+            <div>
+                <MudText Class="labelText">Вид вольера</MudText>
+                <input @bind-value="type" />
+            </div>
+            <div>
+                <MudText Class="labelText">Вид животных</MudText>
+                <input @bind-value="kind" />
+            </div>
+        </div>
+        <div class="tableBlock" style="overflow: scroll;">
+            <MudText Class="labelText">Список животных в вольере:</MudText>
+            <MudTable Items="@animalsList" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+                <RowTemplate>
+                    <MudTd DataLabel="Title" Style="font-size: 20px;">@context.Name</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+    </div>
+</MudPaper>
 
 @code {
+    [Parameter]
+    public string? currentAviaryId { get; set; }
 
+    private List<Animal> animalsList = new List<Animal>();
+
+    private string type = "";
+    private string kind = "";
+    private Aviary currentAviary = new Aviary();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentAviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == int.Parse(currentAviaryId));
+        animalsList = ZooContext.Animals.Where(x => x.AviaryId == int.Parse(currentAviaryId)).ToList();
+        type = ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == currentAviary.TypeId).Title;
+        kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == currentAviary.KindId).Title;
+    }
 }
+

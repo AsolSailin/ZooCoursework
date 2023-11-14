@@ -54,10 +54,10 @@
         {
             <MudItem>
                 <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
-                    <a href="/" @onclick="() => GetAviary(aviary)">
+                    <a @onclick="() => GetAviary(aviary)">
                         <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
                             <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
-                            <MudText Class="titleText">@aviary.Name</MudText>
+                            <MudText Class="titleText">@aviary.Title</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -97,6 +97,6 @@
 
     private void GetAviary(Aviary aviary)
     {
-        //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+        Navigation.NavigateTo($"/aviary_page/{aviary.Id}");
     }
 }

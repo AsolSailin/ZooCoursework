@@ -36,7 +36,7 @@
     <MudSelect T="string" Label="Вид материал" Variant="Variant.Outlined" ValueChanged="GetType" Value="currentType" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
         @foreach (var type in types)
         {
-            <MudSelectItem Value="@(type.Name)" />
+            <MudSelectItem Value="@(type.Title)" />
         }
     </MudSelect>
     <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Заказать материалы</MudButton>
@@ -58,7 +58,7 @@
                     <a href="/" @onclick="() => GetMaterial(material)">
                         <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
                             <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
-                            <MudText Class="labelText">@material.Name</MudText>
+                            <MudText Class="labelText">@material.Title</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -72,7 +72,7 @@
     private List<CareMaterial> materials = new List<CareMaterial>();
 
     private List<MaterialType> types = new List<MaterialType>();
-    private static readonly MaterialType _allTypes = new MaterialType() { Name = "Все" };
+    private static readonly MaterialType _allTypes = new MaterialType() { Title = "Все" };
     private string currentType = "Все";
 
     protected override async Task OnInitializedAsync()
@@ -92,7 +92,7 @@
             return;
         }
 
-        var typeId = ZooContext.MaterialTypes.FirstOrDefault(x => x.Name == currentType).Id;
+        var typeId = ZooContext.MaterialTypes.FirstOrDefault(x => x.Title == currentType).Id;
         materials = ZooContext.CareMaterials.Where(x => x.TypeId == typeId).ToList();
     }
 

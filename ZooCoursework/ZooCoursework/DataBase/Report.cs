@@ -3,9 +3,13 @@ using System.Collections.Generic;
 
 namespace ZooCoursework.DataBase;
 
-public partial class UserAviary
+public partial class Report
 {
     public int Id { get; set; }
+
+    public DateTime Date { get; set; }
+
+    public bool IsAccepted { get; set; }
 
     public int UserId { get; set; }
 

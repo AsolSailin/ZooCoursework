@@ -7,7 +7,7 @@ public partial class MaterialType
 {
     public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Title { get; set; } = null!;
 
     public virtual ICollection<CareMaterial> CareMaterials { get; set; } = new List<CareMaterial>();
 }
