@@ -9,17 +9,15 @@ public partial class Aviary
 
     public string Name { get; set; } = null!;
 
-    public int AnimalCount { get; set; }
-
     public bool Cleaned { get; set; }
 
     public int TypeId { get; set; }
 
-    public int TemperatureId { get; set; }
+    public int? KindId { get; set; }
 
     public virtual ICollection<Animal> Animals { get; set; } = new List<Animal>();
 
-    public virtual Temperature Temperature { get; set; } = null!;
+    public virtual AnimalKind? Kind { get; set; }
 
     public virtual TypeAviary Type { get; set; } = null!;
 

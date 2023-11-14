@@ -23,23 +23,17 @@ public partial class ZooCourseworkContext : DbContext
 
     public virtual DbSet<AnimalMaterial> AnimalMaterials { get; set; }
 
-    public virtual DbSet<AnimalProduct> AnimalProducts { get; set; }
-
     public virtual DbSet<Aviary> Aviaries { get; set; }
 
     public virtual DbSet<CareMaterial> CareMaterials { get; set; }
 
-    public virtual DbSet<ConditionAccommodation> ConditionAccommodations { get; set; }
-
-    public virtual DbSet<CoolingMethod> CoolingMethods { get; set; }
-
     public virtual DbSet<MaterialType> MaterialTypes { get; set; }
-
-    public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
-    public virtual DbSet<Temperature> Temperatures { get; set; }
+    public virtual DbSet<Season> Seasons { get; set; }
+
+    public virtual DbSet<SeasonMethod> SeasonMethods { get; set; }
 
     public virtual DbSet<TemperatureMethod> TemperatureMethods { get; set; }
 
@@ -78,34 +72,23 @@ public partial class ZooCourseworkContext : DbContext
             entity.ToTable("Animal");
 
             entity.Property(e => e.AviaryId).HasColumnName("Aviary_Id");
-            entity.Property(e => e.ConditionId).HasColumnName("Condition_Id");
+            entity.Property(e => e.BirthDate).HasColumnType("date");
             entity.Property(e => e.Image).HasColumnType("image");
-            entity.Property(e => e.KindId).HasColumnName("Kind_Id");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
             entity.HasOne(d => d.Aviary).WithMany(p => p.Animals)
                 .HasForeignKey(d => d.AviaryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Animal_Aviary");
-
-            entity.HasOne(d => d.Condition).WithMany(p => p.Animals)
-                .HasForeignKey(d => d.ConditionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_ConditionAccommodation");
-
-            entity.HasOne(d => d.Kind).WithMany(p => p.Animals)
-                .HasForeignKey(d => d.KindId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_AnimalKind");
         });
 
         modelBuilder.Entity<AnimalKind>(entity =>
         {
             entity.ToTable("AnimalKind");
 
-            entity.Property(e => e.Name)
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Title)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });
@@ -120,7 +103,7 @@ public partial class ZooCourseworkContext : DbContext
             entity.HasOne(d => d.Animal).WithMany(p => p.AnimalMaterials)
                 .HasForeignKey(d => d.AnimalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_Material_Animal");
+                .HasConstraintName("FK_Animal_Material_Animal1");
 
             entity.HasOne(d => d.Material).WithMany(p => p.AnimalMaterials)
                 .HasForeignKey(d => d.MaterialId)
@@ -128,40 +111,20 @@ public partial class ZooCourseworkContext : DbContext
                 .HasConstraintName("FK_Animal_Material_CareMaterial");
         });
 
-        modelBuilder.Entity<AnimalProduct>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Animal_Meal");
-
-            entity.ToTable("Animal_Product");
-
-            entity.Property(e => e.AnimalId).HasColumnName("Animal_Id");
-            entity.Property(e => e.ProductId).HasColumnName("Product_Id");
-
-            entity.HasOne(d => d.Animal).WithMany(p => p.AnimalProducts)
-                .HasForeignKey(d => d.AnimalId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_Meal_Animal");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.AnimalProducts)
-                .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_Product_Product");
-        });
-
         modelBuilder.Entity<Aviary>(entity =>
         {
             entity.ToTable("Aviary");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.KindId).HasColumnName("Kind_Id");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.TemperatureId).HasColumnName("Temperature_Id");
             entity.Property(e => e.TypeId).HasColumnName("Type_Id");
 
-            entity.HasOne(d => d.Temperature).WithMany(p => p.Aviaries)
-                .HasForeignKey(d => d.TemperatureId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Aviary_Temperature");
+            entity.HasOne(d => d.Kind).WithMany(p => p.Aviaries)
+                .HasForeignKey(d => d.KindId)
+                .HasConstraintName("FK_Aviary_AnimalKind");
 
             entity.HasOne(d => d.Type).WithMany(p => p.Aviaries)
                 .HasForeignKey(d => d.TypeId)
@@ -183,42 +146,9 @@ public partial class ZooCourseworkContext : DbContext
                 .HasConstraintName("FK_CareMaterial_MaterialType");
         });
 
-        modelBuilder.Entity<ConditionAccommodation>(entity =>
-        {
-            entity.ToTable("ConditionAccommodation");
-
-            entity.Property(e => e.MaxTemp)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.MinTemp)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-        });
-
-        modelBuilder.Entity<CoolingMethod>(entity =>
-        {
-            entity.ToTable("CoolingMethod");
-
-            entity.Property(e => e.CoolingFacility)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-        });
-
         modelBuilder.Entity<MaterialType>(entity =>
         {
             entity.ToTable("MaterialType");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Name)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-        });
-
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Meal");
-
-            entity.ToTable("Product");
 
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
@@ -234,31 +164,42 @@ public partial class ZooCourseworkContext : DbContext
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<Temperature>(entity =>
+        modelBuilder.Entity<Season>(entity =>
         {
-            entity.ToTable("Temperature");
+            entity.ToTable("Season");
 
-            entity.Property(e => e.DayTime)
+            entity.Property(e => e.Title)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<TemperatureMethod>(entity =>
+        modelBuilder.Entity<SeasonMethod>(entity =>
         {
-            entity.ToTable("Temperature_Method");
+            entity.ToTable("Season_Method");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.MethodId).HasColumnName("Method_Id");
-            entity.Property(e => e.TemperatureId).HasColumnName("Temperature_Id");
+            entity.Property(e => e.SeasonId).HasColumnName("Season_Id");
 
-            entity.HasOne(d => d.Method).WithMany(p => p.TemperatureMethods)
+            entity.HasOne(d => d.Method).WithMany(p => p.SeasonMethods)
                 .HasForeignKey(d => d.MethodId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Temperature_Method_CoolingMethod");
+                .HasConstraintName("FK_Season_Method_TemperatureMethod");
 
-            entity.HasOne(d => d.Temperature).WithMany(p => p.TemperatureMethods)
-                .HasForeignKey(d => d.TemperatureId)
+            entity.HasOne(d => d.Season).WithMany(p => p.SeasonMethods)
+                .HasForeignKey(d => d.SeasonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Temperature_Method_Temperature");
+                .HasConstraintName("FK_Season_Method_Season");
+        });
+
+        modelBuilder.Entity<TemperatureMethod>(entity =>
+        {
+            entity.ToTable("TemperatureMethod");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Title)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<TypeAviary>(entity =>

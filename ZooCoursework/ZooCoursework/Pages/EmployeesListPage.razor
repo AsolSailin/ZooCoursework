@@ -2,6 +2,7 @@
 @using ZooCoursework.DataBase
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <style>
     .mainLabel {
@@ -15,12 +16,20 @@
         font-family: Andale Mono, monospace;
     }
 
-    .labelText {
+    .nameText {
         font-size: 25px;
         font-weight: 500;
         color: #21A77F;
         margin-left: 7px;
         text-align: center;
+    }
+
+    .labelText {
+        font-size: 25px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-left: 7px;
+        text-align: left;
     }
 
     .imgBlock {
@@ -39,7 +48,7 @@
             <MudSelectItem Value="@(role.Name)" />
         }
     </MudSelect>
-    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Добавить сотрудника</MudButton>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 18px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="OpenAddDialog">Добавить сотрудника</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -58,9 +67,9 @@
                     <a href="/" @onclick="() => GetUser(user)">
                         <MudPaper Height="330px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
                             <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
-                            <MudText Class="labelText">@user.Surname </MudText>
-                            <MudText Class="labelText">@user.Name </MudText>
-                            <MudText Class="labelText">@user.Patronymic</MudText>
+                            <MudText Class="nameText">@user.Surname </MudText>
+                            <MudText Class="nameText">@user.Name </MudText>
+                            <MudText Class="nameText">@user.Patronymic</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -68,6 +77,42 @@
         }
     </MudGrid>
 </div>
+
+<MudDialog @bind-IsVisible="visible" Options="options" Style="height: 580px;">
+    <TitleContent>
+        <MudText Style="font-size: 30px">
+            Добавление сотрудника
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="mainblock">
+            <div>
+                <MudText Class="labelText">Фамилия</MudText>
+                <input @bind-value="employeeSurname" />
+            </div>
+            <div>
+                <MudText Class="labelText">Имя</MudText>
+                <input @bind-value="employeeName" />
+            </div>
+            <div>
+                <MudText Class="labelText">Отчество</MudText>
+                <input @bind-value="employeePatronymic" />
+            </div>
+            <div>
+                <MudText Class="labelText">Вольер</MudText>
+                <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="employeeRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+                    @foreach (var role in roles)
+                    {
+                        <MudSelectItem Value="@(role.Name)" />
+                    }
+                </MudSelect>
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 50px; font-size: 15px; border: 3px solid #21A77F; color: #21A77F; margin-right: 7px;" OnClick="Add">Добавить</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private int spacing { get; set; } = 5;
@@ -77,10 +122,22 @@
     private static readonly Role _allRoles = new Role() { Name = "Все" };
     private string currentRole = "Все";
 
+    private bool visible;
+    private DialogOptions options = new DialogOptions { CloseOnEscapeKey = true };
+    private string employeeSurname = "";
+    private string employeeName = "";
+    private string employeePatronymic = "";
+    private string employeeRole = "";
+
     protected override async Task OnInitializedAsync()
     {
         roles = ZooContext.Roles.ToList();
         roles.Add(_allRoles);
+        users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
+    }
+
+    private void ListUpdate()
+    {
         users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
     }
 
@@ -100,11 +157,27 @@
 
     private void GetUser(User user)
     {
-        //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+        Navigation.NavigateTo($"/employee_page/{user.Id}");
     }
+
+    private void OpenAddDialog() => visible = true;
 
     private void Add()
     {
-        
+        var crntRole = ZooContext.Roles.FirstOrDefault(x => x.Name == employeeRole).Id;
+
+        var newUser = new User()
+            {
+                Surname = employeeSurname,
+                Name = employeeName,
+                Patronymic = employeePatronymic,
+                RoleId = crntRole
+            };
+
+        ZooContext.Users.Add(newUser);
+        ZooContext.SaveChanges();
+
+        Snackbar.Add("Сотрудник успешно добавлен!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        ListUpdate();
     }
 }

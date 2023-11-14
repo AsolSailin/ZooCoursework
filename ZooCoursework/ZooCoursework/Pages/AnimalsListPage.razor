@@ -1,9 +1,24 @@
 ﻿@page "/animals_list"
 @using ZooCoursework.DataBase
+@*@using System.Globalization;
+@using System.IO
+@using Firebase.Storage
+@using Microsoft.EntityFrameworkCore*@
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@*@inject FileUploaderService FileUploaderService*@
+
+<PageTitle>СПИСОК ЖИВОТНЫХ</PageTitle>
 
 <style>
+    .mainblock {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
     .mainLabel {
         text-align: center;
         margin-right: 90px;
@@ -15,7 +30,7 @@
         font-family: Andale Mono, monospace;
     }
 
-    .labelText {
+    .titleText {
         font-size: 25px;
         font-weight: 500;
         color: #21A77F;
@@ -23,25 +38,33 @@
         text-align: center;
     }
 
-    .imgBlock {
-        flex: 50%;
-        text-align: center;
-        margin-left: 100px;
-        width: 400px;
-        height: 400px;
+    .labelText {
+        font-size: 23px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-top: 10px;
+        margin-left: 7px;
+    }
+
+    .avatar{
+        background-color: #B2F0D2;
+    }
+
+    .camera{
+        background-color: #21A77F;
+        left: 130px;
+        bottom: 50px;
     }
 </style>
 
-<div style="position: absolute;
-        left: 190px;
-        width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
-    <MudSelect T="string" Label="Вид животных" Variant="Variant.Outlined" ValueChanged="GetKind" Value="currentKind" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
-            @foreach (var kind in kinds)
-            {
-                <MudSelectItem Value="@(kind.Name)" />
-            }
+<div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
+    <MudSelect T="string" Label="Вид животных" Variant="Variant.Outlined" ValueChanged="GetAviary" Value="currentAviary" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+        @foreach (var aviary in aviaries)
+        {
+            <MudSelectItem Value="@(aviary.Name)" />
+        }
     </MudSelect>
-    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Добавить животное</MudButton>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="OpenAddDialog">Добавить животное</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -61,7 +84,7 @@
                     <a href="/" @onclick="() => GetAnimal(animal)">
                         <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
                             <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
-                            <MudText Class="labelText">@animal.Name</MudText>
+                            <MudText Class="titleText">@animal.Name</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -70,42 +93,150 @@
     </MudGrid>
 </div>
 
+<MudDialog @bind-IsVisible="visible" Options="options" Style="height: 580px;">
+    <TitleContent>
+        <MudText Style="font-size: 30px">
+            Добавление животного
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="mainblock">
+            <div class="imgBlock">
+                @if (!string.IsNullOrEmpty(imgUrl))
+                {
+                    <MudAvatar Style="height:300px; width:300px; font-size:2rem; background-color: white" Image="@imgUrl"></MudAvatar>
+                }
+                else
+                {
+                    <MudAvatar Style="height:300px; width:300px; font-size:2rem;" Class="avatar" ></MudAvatar>
+                }
+
+
+                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                    <ButtonTemplate>
+                        <MudIconButton HtmlTag="label"
+                                       Icon="@Icons.Material.Filled.PhotoCamera"
+                                       for="@context" Class="camera">
+                        </MudIconButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            </div>
+
+            <div class="fieldsBlock">
+                <div>
+                    <MudText Class="labelText">Вольер</MudText>
+                    <MudSelect T="string" Variant="Variant.Outlined" ValueChanged="GetKind" Value="animalAviary" Style="font-size: 16px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
+                        @foreach (var aviary in aviaries)
+                        {
+                            <MudSelectItem Value="@(aviary.Name)" />
+                        }
+                    </MudSelect>
+                </div>
+                <div>
+                    <MudText Class="labelText">Вид</MudText>
+                    <input @bind-value="animalKind" readonly="true"/>
+                </div>
+                <div>
+                    <MudText Class="labelText">Имя</MudText>
+                    <input @bind-value="animalName" />
+                </div>
+                <div>
+                    <MudText Class="labelText">Дата рождения</MudText>
+                    <MudDatePicker @bind-Date="animalBirthDate" DisableToolbar="true" Style="bottom:10px;" />
+                </div>
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 50px; font-size: 15px; border: 3px solid #21A77F; color: #21A77F; margin-right: 7px;" OnClick="Add">Добавить</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private int spacing { get; set; } = 5;
     private List<Animal> animals = new List<Animal>();
 
-    private List<AnimalKind> kinds = new List<AnimalKind>();
-    private static readonly AnimalKind _allKinds = new AnimalKind() { Name = "Все" };
-    private string currentKind = "Все";
+    private List<Aviary> aviaries = new List<Aviary>();
+    private static readonly Aviary _allAviaries = new Aviary() { Name = "Все" };
+    private string currentAviary = "Все";
+
+    private bool visible;
+    private DialogOptions options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private String? imgUrl = "";
+    private string animalName = "";
+    private string animalAviary = "";
+    private string animalKind = "";
+    private DateTime? animalBirthDate = DateTime.Today;
 
     protected override async Task OnInitializedAsync()
     {
-        kinds = ZooContext.AnimalKinds.ToList();
-        kinds.Add(_allKinds);
+        aviaries = ZooContext.Aviaries.ToList();
+        aviaries.Add(_allAviaries);
+        animals = ZooContext.Animals.ToList();
+
+        //imgUrl = await FileUploaderService.GetImage();
+    }
+
+    private void ListUpdate()
+    {
         animals = ZooContext.Animals.ToList();
     }
 
-    private void GetKind(string selected)
+    private void GetAviary(string selected)
     {
-        currentKind = selected;
+        currentAviary = selected;
 
-        if(currentKind == "Все")
+        if (currentAviary == "Все")
         {
             animals = ZooContext.Animals.ToList();
             return;
         }
 
-        var kindId = ZooContext.AnimalKinds.FirstOrDefault(x => x.Name == currentKind).Id;
-        animals = ZooContext.Animals.Where(x => x.KindId == kindId).ToList();
+        var aviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Name == currentAviary).Id;
+        animals = ZooContext.Animals.Where(x => x.AviaryId == aviaryId).ToList();
+    }
+
+    private void GetKind(string selected)
+    {
+        animalAviary = selected;
+        var aviary = ZooContext.Aviaries.FirstOrDefault(x => x.Name == animalAviary);
+        var kindId = aviary.KindId;
+        animalKind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == kindId).Title;
     }
 
     private void GetAnimal(Animal animal)
     {
-        //Navigation.NavigateTo($"/animal_info/{animal.Id}");
+        Navigation.NavigateTo($"/animal_page/{animal.Id}");
+    }
+
+    private void OpenAddDialog() => visible = true; 
+
+    private void Update()
+    {
+        animals.Clear();
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        //await FileUploaderService.Upload(Folder.TUTOR, CurrentTutor.Id.ToString(), file);
+        //imgUrl = await FileUploaderService.GetImage(Folder.TUTOR, CurrentTutor.Id.ToString());
+        //StateHasChanged();
     }
 
     private void Add()
     {
-        
+        var newAnimal = new Animal()
+            {
+                Name = animalName,
+                BirthDate = animalBirthDate,
+                Image = null,
+                AviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Name == animalAviary).Id
+            };
+
+        ZooContext.Animals.Add(newAnimal);
+        ZooContext.SaveChanges();
+
+        Snackbar.Add("Животное успешно добавлено!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        ListUpdate();
     }
 }

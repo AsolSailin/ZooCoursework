@@ -9,21 +9,13 @@ public partial class Animal
 
     public string Name { get; set; } = null!;
 
-    public int AviaryId { get; set; }
+    public DateTime? BirthDate { get; set; }
 
-    public int KindId { get; set; }
+    public byte[]? Image { get; set; }
 
-    public int ConditionId { get; set; }
-
-    public byte[] Image { get; set; } = null!;
+    public int? AviaryId { get; set; }
 
     public virtual ICollection<AnimalMaterial> AnimalMaterials { get; set; } = new List<AnimalMaterial>();
 
-    public virtual ICollection<AnimalProduct> AnimalProducts { get; set; } = new List<AnimalProduct>();
-
-    public virtual Aviary Aviary { get; set; } = null!;
-
-    public virtual ConditionAccommodation Condition { get; set; } = null!;
-
-    public virtual AnimalKind Kind { get; set; } = null!;
+    public virtual Aviary? Aviary { get; set; }
 }
