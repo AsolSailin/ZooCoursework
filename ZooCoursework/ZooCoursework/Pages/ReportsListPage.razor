@@ -1,0 +1,90 @@
+﻿@page "/report_list"
+@using ZooCoursework.DataBase
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<style>
+    .paper {
+        position: absolute;
+        left: 180px;
+        top: 100px;
+        width: 1000px;
+        height: 550px;
+        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        background-color: #EEFFF7;
+        border-radius: 30px;
+    }
+
+    .mainLabelText {
+        text-align: center;
+        margin-right: 90px;
+        margin-bottom: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        font-family: Andale Mono, monospace;
+    }
+
+    .labelText {
+        font-size: 25px;
+        font-weight: 500;
+        color: #21A77F;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        margin-left: 7px;
+    }
+
+    .mainLabel {
+        text-align: center;
+        margin-left: 50px;
+        margin-top: 30px;
+        font-size: 50px;
+        font-weight: 500;
+        color: #21A77F;
+        text-decoration: underline;
+        font-family: Andale Mono, monospace;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <div>
+        <MudText Class="mainLabelText">Список отчетов</MudText>
+    </div>
+    <div class="mainBlock">
+        <div class="tableBlock" style="overflow: scroll; height: 379px; width: 700px; margin-left: auto; margin-right: auto;">
+            <MudTable Items="@reportsList" T="Report" Hover="true" @bind-SelectedItem="selectedItem" OnRowClick="@GetReport" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+                <RowTemplate>
+                    <MudTd DataLabel="Title" Style="font-size: 20px; margin-right: 0px">Отчет № @context.Id за @context.Date.ToString("d")</MudTd>
+                    <MudTd DataLabel="Title" Style="font-size: 20px;">@GetFullName(context)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+    </div>
+</MudPaper>
+
+@code {
+    private List<Report> reportsList = new List<Report>();
+    private Report selectedItem = new Report();
+
+    private User currentUser = new User();
+    private Role currentRole = new Role();
+
+    protected override async Task OnInitializedAsync()
+    {
+        reportsList = ZooContext.Reports.ToList();
+    }
+
+    private string GetFullName(Report context)
+    {
+        currentUser = ZooContext.Users.FirstOrDefault(x => x.Id == context.UserId);
+        currentRole = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId);
+
+        return $"{currentRole.Title}: {currentUser.Surname} {currentUser.Name} {currentUser.Patronymic}";
+    }
+
+    private void GetReport()
+    {
+        Navigation.NavigateTo($"/report_page/{selectedItem.Id}");
+    }
+}

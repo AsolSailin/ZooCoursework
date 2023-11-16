@@ -58,15 +58,16 @@
         top: 100px;
         width: 1000px;
         box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
+        border-radius: 30px;
         background-color: #EEFFF7;
     }">
         @foreach (var user in users)
         {
             <MudItem>
-                <MudPaper Height="330px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none;">
+                <MudPaper Height="330px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a @onclick="() => GetUser(user)">
-                        <MudPaper Height="330px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
-                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
+                        <MudPaper Height="330px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
                             <MudText Class="nameText">@user.Surname </MudText>
                             <MudText Class="nameText">@user.Name </MudText>
                             <MudText Class="nameText">@user.Patronymic</MudText>

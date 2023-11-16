@@ -70,9 +70,10 @@
 <div style="position:absolute">
     <MudGrid Spacing="@spacing" Justify="Justify.FlexStart" 
     Style="position: absolute;
-        left: 190px;
+        left: 80px;
+        margin-right: auto;
         top: 100px;
-        width: 1000px;
+        width: 1200px;
         box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
         border-radius: 30px;
         background-color: #EEFFF7;
@@ -80,10 +81,10 @@
         @foreach (var animal in animals)
         {
             <MudItem>
-                <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
+                <MudPaper Height="270px" Width="260px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a @onclick="() => GetAnimal(animal)">
-                        <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
-                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
+                        <MudPaper Height="270px" Width="260px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <img src="@GetImage(animal)" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
                             <MudText Class="titleText">@animal.Name</MudText>
                         </MudPaper>
                     </a>
@@ -102,9 +103,9 @@
     <DialogContent>
         <div class="mainblock">
             <div class="imgBlock">
-                @if (!string.IsNullOrEmpty(imgUrl))
+                @if (!string.IsNullOrEmpty(animalImage))
                 {
-                    <MudAvatar Style="height:300px; width:300px; font-size:2rem; background-color: white" Image="@imgUrl"></MudAvatar>
+                    <MudAvatar Style="height:300px; width:300px; font-size:2rem; background-color: white" Image="@animalImage"></MudAvatar>
                 }
                 else
                 {
@@ -159,10 +160,10 @@
     private List<Aviary> aviaries = new List<Aviary>();
     private static readonly Aviary _allAviaries = new Aviary() { Title = "Все" };
     private string currentAviary = "Все";
+    private string animalImage = "";
 
     private bool visible;
     private DialogOptions options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-    private String? imgUrl = "";
     private string animalName = "";
     private string animalAviary = "";
     private string animalKind = "";
@@ -175,6 +176,11 @@
         animals = ZooContext.Animals.ToList();
 
         //imgUrl = await FileUploaderService.GetImage();
+    }
+
+    private string GetImage(Animal animal)
+    {
+      return $"/images/{animal.Image}";
     }
 
     private void ListUpdate()

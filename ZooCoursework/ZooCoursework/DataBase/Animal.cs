@@ -11,11 +11,9 @@ public partial class Animal
 
     public DateTime BirthDate { get; set; }
 
-    public byte[]? Image { get; set; }
-
     public int AviaryId { get; set; }
 
-    public bool? IsFed { get; set; }
+    public string? Image { get; set; }
 
     public virtual ICollection<AnimalMaterial> AnimalMaterials { get; set; } = new List<AnimalMaterial>();
 

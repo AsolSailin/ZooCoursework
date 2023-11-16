@@ -1,5 +1,12 @@
 ﻿@page "/account"
 
+@using ZooCoursework.DataBase
+@using ZooCoursework.Services
+@inject ZooCourseworkContext ZooContext
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject CurrentElementService CurrentElement
+
 <PageTitle>АККАУНТ</PageTitle>
 
 <style>
@@ -42,27 +49,23 @@
         <div class="fieldsBlock">
             <div>
                 <MudText Class="labelText">Фамилия</MudText>
-                <input @bind-value="surname" />
+                <input @bind-value="CurrentElement.CurrentUser.Surname" />
             </div>
             <div>
                 <MudText Class="labelText">Имя</MudText>
-                <input @bind-value="name" />
+                <input @bind-value="CurrentElement.CurrentUser.Name" />
             </div>
             <div>
                 <MudText Class="labelText">Отчество</MudText>
-                <input @bind-value="patronymic" />
-            </div>
-            <div>
-                <MudText Class="labelText">Дата рождения</MudText>
-                <input @bind-value="birthDate" />
+                <input @bind-value="CurrentElement.CurrentUser.Patronymic" />
             </div>
             <div>
                 <MudText Class="labelText">Логин</MudText>
-                <input @bind-value="login" />
+                <input @bind-value="CurrentElement.CurrentAccount.Login" />
             </div>
             <div>
                 <MudText Class="labelText">Пароль</MudText>
-                <input @bind-value="password" />
+                <input @bind-value="CurrentElement.CurrentAccount.Password" />
             </div>
         </div>
         <div class="imgBlock">
@@ -72,10 +75,5 @@
 </MudPaper>
 
 @code {
-    string surname = "";
-    string name = "";
-    string patronymic = "";
-    string birthDate = "";
-    string login = "";
-    string password = "";
+    
 }

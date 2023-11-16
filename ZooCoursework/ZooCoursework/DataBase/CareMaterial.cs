@@ -11,6 +11,8 @@ public partial class CareMaterial
 
     public int TypeId { get; set; }
 
+    public string? Description { get; set; }
+
     public virtual ICollection<AnimalMaterial> AnimalMaterials { get; set; } = new List<AnimalMaterial>();
 
     public virtual MaterialType Type { get; set; } = null!;

@@ -73,7 +73,9 @@ public partial class ZooCourseworkContext : DbContext
 
             entity.Property(e => e.AviaryId).HasColumnName("Aviary_Id");
             entity.Property(e => e.BirthDate).HasColumnType("date");
-            entity.Property(e => e.Image).HasColumnType("image");
+            entity.Property(e => e.Image)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -98,6 +100,7 @@ public partial class ZooCourseworkContext : DbContext
             entity.ToTable("Animal_Material");
 
             entity.Property(e => e.AnimalId).HasColumnName("Animal_Id");
+            entity.Property(e => e.Date).HasColumnType("date");
             entity.Property(e => e.MaterialId).HasColumnName("Material_Id");
 
             entity.HasOne(d => d.Animal).WithMany(p => p.AnimalMaterials)
@@ -137,6 +140,9 @@ public partial class ZooCourseworkContext : DbContext
         {
             entity.ToTable("CareMaterial");
 
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .IsUnicode(false);
             entity.Property(e => e.Title)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -161,9 +167,11 @@ public partial class ZooCourseworkContext : DbContext
         {
             entity.ToTable("Report");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.AviaryId).HasColumnName("Aviary_id");
             entity.Property(e => e.Date).HasColumnType("date");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .IsUnicode(false);
             entity.Property(e => e.UserId).HasColumnName("User_Id");
 
             entity.HasOne(d => d.Aviary).WithMany(p => p.Reports)

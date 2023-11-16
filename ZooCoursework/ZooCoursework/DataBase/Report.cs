@@ -15,6 +15,8 @@ public partial class Report
 
     public int AviaryId { get; set; }
 
+    public string Description { get; set; } = null!;
+
     public virtual Aviary Aviary { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;

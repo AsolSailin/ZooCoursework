@@ -1,10 +1,23 @@
 ﻿@page "/"
+@using ZooCoursework.Services;
 @inject NavigationManager navigation
+@inject FileSystemService FileSystemService
 
+<InputFile OnChange="@LoadFiles" />
 @code{
     protected override async Task OnInitializedAsync()
     {
-        navigation.NavigateTo("/aviary_list");
+        navigation.NavigateTo("/authorization ");
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            Stream stream = file.OpenReadStream(20000000);
+            await FileSystemService.UploadFileAsync(file.Name, stream);
+            await stream.DisposeAsync();
+        }
     }
 }
 
