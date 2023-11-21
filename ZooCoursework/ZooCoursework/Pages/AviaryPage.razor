@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<PageTitle>ПАСПОРТ ЖИВОТНОГО</PageTitle>
+<PageTitle>СТРАНИЦА ВОЛЬЕРА</PageTitle>
 
 <style>
     .paper {
@@ -80,7 +80,7 @@
         </div>
         <div class="tableBlock" style="overflow: scroll;">
             <MudText Class="labelText">Список животных в вольере:</MudText>
-            <MudTable Items="@animalsList" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+            <MudTable T="Animal" Items="@animalsList" @bind-SelectedItem="selectedItem" OnRowClick="@OnRowClick" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
                 <RowTemplate>
                     <MudTd DataLabel="Title" Style="font-size: 20px;">@context.Name</MudTd>
                 </RowTemplate>
@@ -95,16 +95,22 @@
 
     private List<Animal> animalsList = new List<Animal>();
 
+    private Aviary currentAviary = new Aviary();
+    private Animal selectedItem = new Animal();
+
+    private bool _selectOnRowClick = true;
+
     private string type = "";
     private string kind = "";
-    private Aviary currentAviary = new Aviary();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         currentAviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == int.Parse(currentAviaryId));
         animalsList = ZooContext.Animals.Where(x => x.AviaryId == int.Parse(currentAviaryId)).ToList();
         type = ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == currentAviary.TypeId).Title;
         kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == currentAviary.KindId).Title;
     }
+
+    public async Task OnRowClick(TableRowClickEventArgs<Animal> args) => Navigation.NavigateTo($"/animal_page/{selectedItem.Id}");
 }
 

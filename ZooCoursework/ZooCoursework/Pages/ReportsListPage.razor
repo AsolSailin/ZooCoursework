@@ -1,8 +1,11 @@
 ﻿@page "/report_list"
 @using ZooCoursework.DataBase
+@using System.Globalization;
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+
+<PageTitle>СПИСОК ОТЧЕТОВ</PageTitle>
 
 <style>
     .paper {
@@ -18,8 +21,8 @@
 
     .mainLabelText {
         text-align: center;
-        margin-right: 90px;
-        margin-bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
         font-size: 50px;
         font-weight: 500;
         color: #21A77F;
@@ -48,8 +51,15 @@
 </style>
 
 <MudPaper Class="paper">
+    <MudText Class="mainLabelText">Список отчетов</MudText>
     <div>
-        <MudText Class="mainLabelText">Список отчетов</MudText>
+        <MudDatePicker Style="width: 25%; margin-left: auto; margin-right: auto; " Editable="true" Date="date" ImmediateText="true" Placeholder="день.месяц.год" DateFormat="@dateFormat" TextChanged="DatePickerTextChanged" Clearable="true" />
+        @*<MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="selectRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+            @foreach (var role in roles)
+            {
+                <MudSelectItem Value="@(role.Title)" />
+            }
+        </MudSelect>*@
     </div>
     <div class="mainBlock">
         <div class="tableBlock" style="overflow: scroll; height: 379px; width: 700px; margin-left: auto; margin-right: auto;">
@@ -57,6 +67,14 @@
                 <RowTemplate>
                     <MudTd DataLabel="Title" Style="font-size: 20px; margin-right: 0px">Отчет № @context.Id за @context.Date.ToString("d")</MudTd>
                     <MudTd DataLabel="Title" Style="font-size: 20px;">@GetFullName(context)</MudTd>
+                    @if(context.IsAccepted)
+                    {
+                        <MudTd DataLabel="Title" Style="font-size: 20px;">Принят</MudTd>
+                    }
+                    else
+                    {
+                        <MudTd DataLabel="Title" Style="font-size: 20px;">-----</MudTd>
+                    }
                 </RowTemplate>
             </MudTable>
         </div>
@@ -64,16 +82,61 @@
 </MudPaper>
 
 @code {
-    private List<Report> reportsList = new List<Report>();
-    private Report selectedItem = new Report();
+    DateTime? date = DateTime.Today;
+    string dateFormat = "dd.MM.yyyy";
 
+    private List<Report> reportsList = new List<Report>();
+    private List<Role> roles = new List<Role>();
+    private List<User> users = new List<User>();
+
+    private static readonly Role _allRoles = new Role() { Title = "Все" };
+
+    private Report selectedItem = new Report();
     private User currentUser = new User();
     private Role currentRole = new Role();
 
-    protected override async Task OnInitializedAsync()
+    private string selectRole = "Все";
+
+    protected override void OnInitialized()
     {
-        reportsList = ZooContext.Reports.ToList();
+        roles = ZooContext.Roles.ToList();
+        GetReportList();
     }
+
+    private void GetReportList() => reportsList = ZooContext.Reports.Where(x => x.Date == date).ToList();
+
+    private void GetReport() => Navigation.NavigateTo($"/report_page/{selectedItem.Id}");
+
+    private void DatePickerTextChanged(string value)
+    {
+        if (value == null || value.Length < 6)
+        {
+            date = null;
+        }
+        else
+        {
+            string[] formats = { "ddMMyy", "dd.MM.yyyy", "dd.M.yyyy", "d.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "dd.M.yy", "d.MM.yy", "d.M.yy" };
+
+            if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime validDate)) date = validDate;
+            else date = null;
+        }
+
+        GetReportList();
+    }
+
+    //private void GetRole(string selected)
+    //{
+    //    selectRole = selected;
+
+    //    if (selectRole == "Все")
+    //    {
+    //        reportsList = ZooContext.Reports.Where(x => x.Date == date).ToList();
+    //        return;
+    //    }
+
+    //    var roleId = ZooContext.Roles.FirstOrDefault(x => x.Title == selectRole).Id;
+    //    reportsList = ZooContext.Reports.Where(x => x.Date == date && x.User.RoleId == roleId).ToList();
+    //}
 
     private string GetFullName(Report context)
     {
@@ -81,10 +144,5 @@
         currentRole = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId);
 
         return $"{currentRole.Title}: {currentUser.Surname} {currentUser.Name} {currentUser.Patronymic}";
-    }
-
-    private void GetReport()
-    {
-        Navigation.NavigateTo($"/report_page/{selectedItem.Id}");
     }
 }

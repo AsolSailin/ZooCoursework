@@ -1,7 +1,9 @@
 ﻿@page "/animal_page/{currentAnimalId}"
 @using ZooCoursework.DataBase
+@using ZooCoursework.RazorComponents;
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
 <PageTitle>ПАСПОРТ ЖИВОТНОГО</PageTitle>
@@ -36,6 +38,7 @@
         margin-bottom: 5px;
         margin-left: 7px;
     }
+
     .fieldsBlock {
         flex: 50%;
         margin-bottom: 30px;
@@ -52,9 +55,12 @@
 </style>
 
 <MudPaper Class="paper">
+    <div>
+        <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Delete">Удалить</MudButton>
+    </div>
     <div class="mainBlock">
         <div class="imgBlock">
-            <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="/images/Лого.png"></MudAvatar>
+            <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="@imagePath"></MudAvatar>
         </div>
         <div class="fieldsBlock">
             <div>
@@ -62,7 +68,7 @@
                 <input @bind-value="currentAnimal.Name" />
             </div>
             <div>
-                <MudText Class="labelText">Возраст</MudText>
+                <MudText Class="labelText">Дата рождения </MudText>
                 <input @bind-value="@date"/>
             </div>
             <div>
@@ -81,18 +87,50 @@
     [Parameter]
     public string? currentAnimalId { get; set; }
 
-    private string kind = "";
-    private string date = "";
     private Aviary aviary = new Aviary();
     private Animal currentAnimal = new Animal();
 
-    protected override async Task OnInitializedAsync()
+    private string kind = "";
+    private string date = "";
+    private string imagePath = "";
+
+    protected override void OnInitialized()
     {
         currentAnimal = ZooContext.Animals.FirstOrDefault(x => x.Id == int.Parse(currentAnimalId));
         aviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == currentAnimal.AviaryId);
         kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == aviary.KindId).Title;
+        GetDate();
+        GetImage();
+    }
 
-        date = currentAnimal.BirthDate.ToString("d");
+    private void GetImage() => imagePath = $"/images/Animals/{currentAnimal.Image}";
+
+    private void GetDate()
+    {
+        var age = DateTime.Today.Year - currentAnimal.BirthDate.Year;
+        var year = "";
+
+        if (currentAnimal.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
+
+        if (age < 1) year = "меньше года";
+        else if(age == 1) year = "год";
+        else if(age >= 2 && age <= 4) year = "года";
+        else year = "лет";
+
+        date = $"{currentAnimal.BirthDate.ToString("d")} ({age.ToString()} {year})";
+    }
+
+    private async Task Delete()
+    {
+        var result = await DialogService.Show<DeleteDialog>($"Вы уверены, что хотите удалить это животное из зоопарка?").Result;
+
+        if (!result.Canceled)
+        {
+            ZooContext.Animals.Remove(currentAnimal);
+            ZooContext.SaveChanges();
+            Snackbar.Add("Животное успешно удалено!", Severity.Success, config => { config.ShowCloseIcon = false; });
+            Navigation.NavigateTo("/animals_list");
+        }
     }
 }
 

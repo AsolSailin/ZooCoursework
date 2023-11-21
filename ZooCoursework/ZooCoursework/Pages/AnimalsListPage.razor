@@ -1,13 +1,10 @@
 ﻿@page "/animals_list"
 @using ZooCoursework.DataBase
-@*@using System.Globalization;
-@using System.IO
-@using Firebase.Storage
-@using Microsoft.EntityFrameworkCore*@
+@using ZooCoursework.Services;
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
-@*@inject FileUploaderService FileUploaderService*@
+@inject FileSystemService FileSystemService
 
 <PageTitle>СПИСОК ЖИВОТНЫХ</PageTitle>
 
@@ -55,6 +52,14 @@
         left: 130px;
         bottom: 50px;
     }
+
+    .fieldsBlock {
+        flex: 50%;
+        margin-left: 50px;
+        height: 400px;
+        width: 300px;
+        overflow-y: scroll;
+    }
 </style>
 
 <div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
@@ -84,7 +89,15 @@
                 <MudPaper Height="270px" Width="260px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a @onclick="() => GetAnimal(animal)">
                         <MudPaper Height="270px" Width="260px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
-                            <img src="@GetImage(animal)" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 20px 20px 0 0;" />
+                            @if (animal.Image != null)
+                            {
+                               <img src="@GetImage(animal)" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 17px 17px 0 0;" /> 
+                            }
+                            else
+                            {
+                                <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 17px 17px 0 0;" />
+                            }
+                            
                             <MudText Class="titleText">@animal.Name</MudText>
                         </MudPaper>
                     </a>
@@ -94,7 +107,7 @@
     </MudGrid>
 </div>
 
-<MudDialog @bind-IsVisible="visible" Options="options" Style="height: 580px;">
+<MudDialog @bind-IsVisible="visible" Options="options" Style="height: 600px;">
     <TitleContent>
         <MudText Style="font-size: 30px">
             Добавление животного
@@ -105,15 +118,14 @@
             <div class="imgBlock">
                 @if (!string.IsNullOrEmpty(animalImage))
                 {
-                    <MudAvatar Style="height:300px; width:300px; font-size:2rem; background-color: white" Image="@animalImage"></MudAvatar>
+                    <MudAvatar Style="height:300px; width:300px; font-size:2rem; background-color: white" Image="@imagePath"></MudAvatar>
                 }
                 else
                 {
                     <MudAvatar Style="height:300px; width:300px; font-size:2rem;" Class="avatar" ></MudAvatar>
                 }
 
-
-                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                <MudFileUpload T="IBrowserFile" OnFilesChanged="LoadFiles">
                     <ButtonTemplate>
                         <MudIconButton HtmlTag="label"
                                        Icon="@Icons.Material.Filled.PhotoCamera"
@@ -134,6 +146,15 @@
                     </MudSelect>
                 </div>
                 <div>
+                    <MudText Class="labelText">Пол</MudText>
+                    <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 16px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
+                        @foreach (var g in genders)
+                        {
+                            <MudSelectItem Value="@(g.Title)" />
+                        }
+                    </MudSelect>
+                </div>
+                <div>
                     <MudText Class="labelText">Вид</MudText>
                     <input @bind-value="animalKind" readonly="true"/>
                 </div>
@@ -143,7 +164,7 @@
                 </div>
                 <div>
                     <MudText Class="labelText">Дата рождения</MudText>
-                    <MudDatePicker @bind-Date="animalBirthDate" DisableToolbar="true" Style="bottom:10px;" />
+                    <MudDatePicker @bind-Date="animalBirthDate" DisableToolbar="true" Style="width: 380px; margin-left: 10px;" />
                 </div>
             </div>
         </div>
@@ -155,38 +176,42 @@
 
 @code {
     private int spacing { get; set; } = 5;
-    private List<Animal> animals = new List<Animal>();
 
+    private List<Animal> animals = new List<Animal>();
     private List<Aviary> aviaries = new List<Aviary>();
+    private List<AnimalGender> genders = new List<AnimalGender>();
     private static readonly Aviary _allAviaries = new Aviary() { Title = "Все" };
+
     private string currentAviary = "Все";
     private string animalImage = "";
-
-    private bool visible;
-    private DialogOptions options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private string imagePath = "";
     private string animalName = "";
     private string animalAviary = "";
     private string animalKind = "";
-    private DateTime? animalBirthDate = DateTime.Today;
+    private string gender = "";
 
-    protected override async Task OnInitializedAsync()
+    private DialogOptions options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private DateTime? animalBirthDate = DateTime.Today;
+    private bool visible;
+
+    protected override void OnInitialized()
     {
         aviaries = ZooContext.Aviaries.ToList();
+        genders = ZooContext.AnimalGenders.ToList();
         aviaries.Add(_allAviaries);
         animals = ZooContext.Animals.ToList();
-
-        //imgUrl = await FileUploaderService.GetImage();
+        animals.Reverse();
     }
 
-    private string GetImage(Animal animal)
-    {
-      return $"/images/{animal.Image}";
-    }
+    private string GetImage(Animal animal) => $"/images/Animals/{animal.Image}";
 
-    private void ListUpdate()
-    {
-        animals = ZooContext.Animals.ToList();
-    }
+    private void GetAnimal(Animal animal) => Navigation.NavigateTo($"/animal_page/{animal.Id}");
+
+    private void ListUpdate() => animals = ZooContext.Animals.ToList();
+
+    private void OpenAddDialog() => visible = true;
+
+    private void Update() => animals.Clear();
 
     private void GetAviary(string selected)
     {
@@ -210,39 +235,47 @@
         animalKind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == kindId).Title;
     }
 
-    private void GetAnimal(Animal animal)
+    private async Task LoadFiles(InputFileChangeEventArgs e)
     {
-        Navigation.NavigateTo($"/animal_page/{animal.Id}");
-    }
-
-    private void OpenAddDialog() => visible = true; 
-
-    private void Update()
-    {
-        animals.Clear();
-    }
-
-    private async Task UploadFiles(IBrowserFile file)
-    {
-        //await FileUploaderService.Upload(Folder.TUTOR, CurrentTutor.Id.ToString(), file);
-        //imgUrl = await FileUploaderService.GetImage(Folder.TUTOR, CurrentTutor.Id.ToString());
-        //StateHasChanged();
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            Stream stream = file.OpenReadStream(5000000000);
+            await FileSystemService.UploadFileAsync(file.Name, stream, "animal");
+            animalImage = file.Name;
+            await stream.DisposeAsync();
+            imagePath = $"/images/Animals/{file.Name}";
+        }
     }
 
     private void Add()
     {
+        var crntGender = ZooContext.AnimalGenders.FirstOrDefault(x => x.Title == gender).Id;
+
         var newAnimal = new Animal()
-            {
-                Name = animalName,
-                BirthDate = (DateTime)animalBirthDate,
-                Image = null,
-                AviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Title == animalAviary).Id
-            };
+        {
+            Name = animalName,
+            BirthDate = (DateTime)animalBirthDate,
+            Image = animalImage,
+            AviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Title == animalAviary).Id,
+            GenderId = crntGender
+        };
 
         ZooContext.Animals.Add(newAnimal);
         ZooContext.SaveChanges();
 
         Snackbar.Add("Животное успешно добавлено!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        visible = false;
+        GetNull();
         ListUpdate();
+    }
+
+    private void GetNull()
+    {
+        animalImage = "";
+        imagePath = "";
+        animalName = "";
+        animalAviary = "";
+        animalKind = "";
+        animalBirthDate = DateTime.Today;
     }
 }

@@ -3,6 +3,8 @@
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 
+<PageTitle>СПИСОК ВОЛЬЕРОВ</PageTitle>
+
 <style>
     .mainblock {
         display: flex;
@@ -54,10 +56,10 @@
         @foreach (var aviary in aviaries)
         {
             <MudItem>
-                <MudPaper Height="170px" Width="210px" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
+                <MudPaper Height="100px" Width="210px" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a @onclick="() => GetAviary(aviary)">
-                        <MudPaper Height="170px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
-                            <MudText Class="titleText">@aviary.Title</MudText>
+                        <MudPaper Height="100px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <MudText Class="d-flex align-center justify-center mud-width-full py-8" Style="font-size: 25px; font-weight: 500;">@aviary.Title</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -68,18 +70,21 @@
 
 @code {
     private int spacing { get; set; } = 5;
-    private List<Aviary> aviaries = new List<Aviary>();
 
+    private List<Aviary> aviaries = new List<Aviary>();
     private List<AnimalKind> kinds = new List<AnimalKind>();
     private static readonly AnimalKind _allKinds = new AnimalKind() { Title = "Все" };
+
     private string currentKind = "Все";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         kinds = ZooContext.AnimalKinds.ToList();
         kinds.Add(_allKinds);
         aviaries = ZooContext.Aviaries.ToList();
     }
+
+    private void GetAviary(Aviary aviary) => Navigation.NavigateTo($"/aviary_page/{aviary.Id}");
 
     private void GetKind(string selected)
     {
@@ -93,10 +98,5 @@
 
         var kindId = ZooContext.AnimalKinds.FirstOrDefault(x => x.Title == currentKind).Id;
         aviaries = ZooContext.Aviaries.Where(x => x.KindId == kindId).ToList();
-    }
-
-    private void GetAviary(Aviary aviary)
-    {
-        Navigation.NavigateTo($"/aviary_page/{aviary.Id}");
     }
 }

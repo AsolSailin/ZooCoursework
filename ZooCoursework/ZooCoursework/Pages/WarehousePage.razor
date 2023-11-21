@@ -39,7 +39,7 @@
             <MudSelectItem Value="@(type.Title)" />
         }
     </MudSelect>
-    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="Add">Заказать материалы</MudButton>
+    <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" >Заказать материалы</MudButton>
 </div>
 
 <div style="position:absolute">
@@ -54,11 +54,10 @@
         @foreach (var material in materials)
         {
             <MudItem>
-                <MudPaper Height="290px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none;">
+                <MudPaper Height="100px" Width="210px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a href="/" @onclick="() => GetMaterial(material)">
-                        <MudPaper Height="290px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;">
-                            <img src="/images/Лого.png" style="height:200px; width:100%; background-color: #EEFFF7; " />
-                            <MudText Class="labelText">@material.Title</MudText>
+                        <MudPaper Height="100px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <MudText Class="d-flex align-center justify-center mud-width-full py-8" Style="font-size: 25px; font-weight: 500;">@material.Title</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -69,17 +68,19 @@
 
 @code {
     private int spacing { get; set; } = 5;
-    private List<CareMaterial> materials = new List<CareMaterial>();
 
+    private List<CareMaterial> materials = new List<CareMaterial>();
     private List<MaterialType> types = new List<MaterialType>();
+
     private static readonly MaterialType _allTypes = new MaterialType() { Title = "Все" };
+
     private string currentType = "Все";
 
     protected override async Task OnInitializedAsync()
     {
         types = ZooContext.MaterialTypes.ToList();
         types.Add(_allTypes);
-        materials = ZooContext.CareMaterials.ToList();
+        materials = ZooContext.CareMaterials.Where(x => x.Quantity != 0).ToList();
     }
 
     private void GetType(string selected)
@@ -88,21 +89,16 @@
 
         if (currentType == "Все")
         {
-            materials = ZooContext.CareMaterials.ToList();
+            materials = ZooContext.CareMaterials.Where(x => x.Quantity != 0).ToList();
             return;
         }
 
         var typeId = ZooContext.MaterialTypes.FirstOrDefault(x => x.Title == currentType).Id;
-        materials = ZooContext.CareMaterials.Where(x => x.TypeId == typeId).ToList();
+        materials = ZooContext.CareMaterials.Where(x => x.Quantity != 0 && x.TypeId == typeId).ToList();
     }
 
     private void GetMaterial(CareMaterial material)
     {
         //Navigation.NavigateTo($"/animal_info/{animal.Id}");
-    }
-
-    private void Add ()
-    {
-        
     }
 }

@@ -19,6 +19,8 @@ public partial class ZooCourseworkContext : DbContext
 
     public virtual DbSet<Animal> Animals { get; set; }
 
+    public virtual DbSet<AnimalGender> AnimalGenders { get; set; }
+
     public virtual DbSet<AnimalKind> AnimalKinds { get; set; }
 
     public virtual DbSet<AnimalMaterial> AnimalMaterials { get; set; }
@@ -28,6 +30,10 @@ public partial class ZooCourseworkContext : DbContext
     public virtual DbSet<CareMaterial> CareMaterials { get; set; }
 
     public virtual DbSet<MaterialType> MaterialTypes { get; set; }
+
+    public virtual DbSet<MeasurementUnit> MeasurementUnits { get; set; }
+
+    public virtual DbSet<PersonGender> PersonGenders { get; set; }
 
     public virtual DbSet<Report> Reports { get; set; }
 
@@ -73,6 +79,7 @@ public partial class ZooCourseworkContext : DbContext
 
             entity.Property(e => e.AviaryId).HasColumnName("Aviary_Id");
             entity.Property(e => e.BirthDate).HasColumnType("date");
+            entity.Property(e => e.GenderId).HasColumnName("Gender_Id");
             entity.Property(e => e.Image)
                 .HasMaxLength(100)
                 .IsUnicode(false);
@@ -82,8 +89,21 @@ public partial class ZooCourseworkContext : DbContext
 
             entity.HasOne(d => d.Aviary).WithMany(p => p.Animals)
                 .HasForeignKey(d => d.AviaryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Animal_Aviary");
+                .HasConstraintName("FK_Animal_Aviary1");
+
+            entity.HasOne(d => d.Gender).WithMany(p => p.Animals)
+                .HasForeignKey(d => d.GenderId)
+                .HasConstraintName("FK_Animal_AnimalGender");
+        });
+
+        modelBuilder.Entity<AnimalGender>(entity =>
+        {
+            entity.ToTable("AnimalGender");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Title)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<AnimalKind>(entity =>
@@ -143,10 +163,17 @@ public partial class ZooCourseworkContext : DbContext
             entity.Property(e => e.Description)
                 .HasMaxLength(500)
                 .IsUnicode(false);
+            entity.Property(e => e.ExpiryDate).HasColumnType("date");
+            entity.Property(e => e.MeasurementUnitId).HasColumnName("MeasurementUnit_Id");
+            entity.Property(e => e.ProductionDate).HasColumnType("date");
             entity.Property(e => e.Title)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.TypeId).HasColumnName("Type_Id");
+
+            entity.HasOne(d => d.MeasurementUnit).WithMany(p => p.CareMaterials)
+                .HasForeignKey(d => d.MeasurementUnitId)
+                .HasConstraintName("FK_CareMaterial_MeasurementUnit");
 
             entity.HasOne(d => d.Type).WithMany(p => p.CareMaterials)
                 .HasForeignKey(d => d.TypeId)
@@ -158,6 +185,26 @@ public partial class ZooCourseworkContext : DbContext
         {
             entity.ToTable("MaterialType");
 
+            entity.Property(e => e.Title)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MeasurementUnit>(entity =>
+        {
+            entity.ToTable("MeasurementUnit");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Title)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<PersonGender>(entity =>
+        {
+            entity.ToTable("PersonGender");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Title)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -246,6 +293,24 @@ public partial class ZooCourseworkContext : DbContext
         {
             entity.ToTable("User");
 
+            entity.Property(e => e.BirthDate).HasColumnType("date");
+            entity.Property(e => e.BirthPlace)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.DivissionCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.GenderId).HasColumnName("Gender_Id");
+            entity.Property(e => e.IdentityDocument)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Image)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.IssuedDate).HasColumnType("date");
+            entity.Property(e => e.IssuedPlace)
+                .HasMaxLength(500)
+                .IsUnicode(false);
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -257,10 +322,13 @@ public partial class ZooCourseworkContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
+            entity.HasOne(d => d.Gender).WithMany(p => p.Users)
+                .HasForeignKey(d => d.GenderId)
+                .HasConstraintName("FK_User_PersonGender");
+
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_User_Role1");
+                .HasConstraintName("FK_User_Role");
         });
 
         OnModelCreatingPartial(modelBuilder);

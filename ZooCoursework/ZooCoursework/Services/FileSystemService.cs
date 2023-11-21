@@ -2,9 +2,21 @@
 {
     public class FileSystemService
     {
-        public async Task UploadFileAsync(string name, Stream stream)
+        string path = "";
+
+        public async Task UploadFileAsync(string name, Stream stream, string animalOrEmployee)
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\images", name);
+            
+            switch(animalOrEmployee)
+            {
+                case "animal":
+                    path = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\images\Animals", name);
+                    break;
+                case "emloyee":
+                    path = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\images\Users", name);
+                    break;
+            }
+            
             using var fs = new FileStream(path, FileMode.Create);
             await stream.CopyToAsync(fs);
         }

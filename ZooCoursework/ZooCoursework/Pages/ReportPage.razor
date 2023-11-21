@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<PageTitle>ПАСПОРТ ЖИВОТНОГО</PageTitle>
+<PageTitle>СТРАНИЦА ОТЧЕТА</PageTitle>
 
 <style>
     .paper {
@@ -53,29 +53,31 @@
 
     .mainLabel {
         text-align: center;
-        margin-left: 50px;
+        margin-left: auto;
+        margin-right: auto;
         font-size: 50px;
         font-weight: 500;
         color: #21A77F;
         text-decoration: underline;
         font-family: Andale Mono, monospace;
     }
-</style>
 
-<div style="position:absolute">
-    <MudGrid Justify="Justify.FlexStart"
-                Style="position: absolute;
-        left: 190px;
-        width: 1000px;
-        box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
-        background-color: #EEFFF7;
-        padding: 30px;
+    .main {
+        height: 100%;
         margin-left: auto;
         margin-right: auto;
-    }">
-        <div style="display:inline">
+        overflow-y: scroll;
+    }
+</style>
+
+<MudPaper Class="paper">
+    <div class="main">
+        <div >
                 <p Class="mainLabel">Отчет №@currentReportId</p>
-                <MudButton Variant="Variant.Outlined" Style="bottom: 30px; border-radius: 10px; height: 30px; font-size: 18px; border: 3px solid #21A77F; color: #21A77F; left: 60px;" OnClick="GetAccept">Принять отчет</MudButton>
+                @if (!currentReport.IsAccepted)
+                {
+                    <MudButton Variant="Variant.Outlined" Style="bottom: 30px; border-radius: 10px; height: 30px; font-size: 18px; border: 3px solid #21A77F; color: #21A77F;" Class="d-flex mx-auto" OnClick="GetAccept">Принять отчет</MudButton>
+                }
         </div>
         <div class="mainBlock">
             <div class="fieldsBlock">
@@ -114,7 +116,7 @@
                           InputData="@data" InputLabels="@labels"></MudChart>
             </div>
         </div>
-        <div style="margin-left: auto; margin-right: auto;">
+        <div style="margin-left: 50px; margin-right: 50px;">
             <MudText Class="labelText">Отчетная таблица:</MudText>
             <MudTable Items="@aviariesList" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
                 <HeaderContent>
@@ -133,27 +135,27 @@
                 </RowTemplate>
             </MudTable>
         </div>
-        <div style="margin-left: auto; margin-right: auto;">
-            <MudText style="text-decoration: underline;">@currentReport.Description</MudText>
-        </div>
-    </MudGrid>
-</div>
+        <MudText style="font-size: 20px; margin-left: 50px; margin-top: 10px;">@currentReport.Description</MudText>
+    </div>
+</MudPaper>
 
 @code {
     [Parameter]
     public string? currentReportId { get; set; }
 
+    private List<Aviary> aviariesList = new List<Aviary>();
+    private List<Animal> animalsList = new List<Animal>();
+    private List<AnimalMaterial> animalMaterials = new List<AnimalMaterial>();
+    private List<CareMaterial> materials = new List<CareMaterial>();
+
+    public List<int> dataList = new List<int>();
+    public List<string> labelsList = new List<string>();
+
     private Report currentReport = new Report();
     private User currentUser = new User();
     private Aviary currentAviary = new Aviary();
     private Role currentRole = new Role();
-    private List<Aviary> aviariesList = new List<Aviary>();
-    private List<Animal> animalsList = new List<Animal>();
-
-    private List<AnimalMaterial> animalMaterials = new List<AnimalMaterial>();
-    private List<CareMaterial> materials = new List<CareMaterial>();
-    public List<int> dataList = new List<int>();
-    public List<string> labelsList = new List<string>();
+    
     public string[] labels = new string[] { };
     public double[] data = new double[] { };
 
@@ -203,26 +205,19 @@
         labels = labelsList.ToArray();
     }
 
-    private string GetType(Aviary context)
-    {
-        return ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == context.TypeId).Title;
-    }
+        private string GetType(Aviary context) => ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == context.TypeId).Title;
 
-    private string GetKind(Aviary context)
-    {
-        return ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == context.KindId).Title;
-    }
+        private string GetKind(Aviary context) => ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == context.KindId).Title;
 
-    private string GetCount(Aviary context)
-    {
-        return ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id).ToList().Count.ToString();
-    }
+        private string GetCount(Aviary context) => ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id).ToList().Count.ToString();
 
     private void GetAccept()
     {
         currentReport.IsAccepted = true;
         ZooContext.Reports.Update(currentReport);
         ZooContext.SaveChanges();
+        Snackbar.Add("Отчет принят!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        Navigation.NavigateTo($"/report_list");
     }
 }
 

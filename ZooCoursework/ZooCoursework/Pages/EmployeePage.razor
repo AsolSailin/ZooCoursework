@@ -1,10 +1,12 @@
 ﻿@page "/employee_page/{currentEmployeeId}"
 @using ZooCoursework.DataBase
+@using ZooCoursework.RazorComponents;
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>АККАУНТ СОТРУДНИКА</PageTitle>
+<PageTitle>СТРАНИЦА СОТРУДНИКА</PageTitle>
 
 <style>
     .paper {
@@ -48,8 +50,9 @@
 
     .fieldsBlock {
         flex: 50%;
-        margin-bottom: 30px;
         margin-left: 50px;
+        height: 450px;
+        overflow-y: scroll;
     }
 
     .imgBlock {
@@ -62,9 +65,12 @@
 </style>
 
 <MudPaper Class="paper">
+    <div>
+        <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Delete">Удалить</MudButton>
+    </div>
     <div class="mainBlock">
         <div class="imgBlock">
-            <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="/images/Лого.png"></MudAvatar>
+            <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="@imagePath"></MudAvatar>
         </div>
         <div class="fieldsBlock">
             <div>
@@ -83,6 +89,33 @@
                 <MudText Class="labelText">Должность</MudText>
                 <input @bind-value="role" />
             </div>
+            <div>
+                <MudText Class="labelText">@currentUser.IdentityDocument</MudText>
+            </div>
+            <div>
+                <MudText Class="labelText">Серия и номер</MudText>
+                <input @bind-value="@seriesAndNumber" />
+            </div>
+            <div>
+                <MudText Class="labelText">Кем выдан</MudText>
+                <input @bind-value="currentUser.IssuedPlace" />
+            </div>
+            <div>
+                <MudText Class="labelText">Код подразделения</MudText>
+                <input @bind-value="currentUser.DivissionCode" />
+            </div>
+            <div>
+                <MudText Class="labelText">Дата выдачи</MudText>
+                <input @bind-value="@issueDate" />
+            </div>
+            <div>
+                <MudText Class="labelText">Дата рождения</MudText>
+                <input @bind-value="@birthDate" />
+            </div>
+            <div>
+                <MudText Class="labelText">Пол</MudText>
+                <input @bind-value="ZooContext.PersonGenders.FirstOrDefault(x => x.Id == currentUser.GenderId).Title" />
+            </div>
         </div>
     </div>
 </MudPaper>
@@ -91,12 +124,41 @@
     [Parameter]
     public string? currentEmployeeId { get; set; }
 
-    private string role = "";
     private User currentUser = new User();
+
+    private string role = "";
+    private string seriesAndNumber = "";
+    private string issueDate = "";
+    private string birthDate = "";
+    private string imagePath = "";
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = ZooContext.Users.FirstOrDefault(x => x.Id == int.Parse(currentEmployeeId));
+        GetFields();
+        GetImage();
+    }
+
+    private void GetImage() => imagePath = $"/images/Users/{currentUser.Image}";
+
+    private void GetFields()
+    {
+        seriesAndNumber = $"{currentUser.DocumentSeries} {currentUser.DocumentNumber}";
+        issueDate = currentUser.IssuedDate.Value.ToString("d");
+        birthDate = currentUser.BirthDate.Value.ToString("d");
         role = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId).Title;
+    }
+
+    private async Task Delete()
+    {
+        var result = await DialogService.Show<DeleteDialog>($"Вы уверены, что хотите удалить этого сотрудника из зоопарка?").Result;
+
+        if (!result.Canceled)
+        {
+            ZooContext.Users.Remove(currentUser);
+            ZooContext.SaveChanges();
+            Snackbar.Add("Сотрудник успешно удален!", Severity.Success, config => { config.ShowCloseIcon = false; });
+            Navigation.NavigateTo("/employees_list");
+        }
     }
 }

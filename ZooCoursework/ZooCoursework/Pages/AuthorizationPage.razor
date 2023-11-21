@@ -118,6 +118,6 @@
         CurrentElement.CurrentAccount = accountDb;
         CurrentElement.CurrentUser = ZooContext.Users.FirstOrDefault(x => x.Id == accountDb.UserId);
 
-        Navigation.NavigateTo("/map");
+        Navigation.NavigateTo("/account");
     }
 }
