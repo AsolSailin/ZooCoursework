@@ -51,6 +51,7 @@
     .fieldsBlock {
         flex: 50%;
         margin-left: 50px;
+        margin-right: 50px;
         height: 450px;
         overflow-y: scroll;
     }
@@ -120,7 +121,7 @@
                 }
                 else
                 {
-                    <MudDatePicker @bind-Date="issueDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;margin-bottom: 50px;" />
+                    <MudDatePicker @bind-Date="issueDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;" />
                 }
             </div>
             <div>
@@ -131,26 +132,40 @@
                 }
                 else
                 {
-                    <MudDatePicker @bind-Date="birthDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;margin-bottom: 50px;" />
+                    <MudDatePicker @bind-Date="birthDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;" />
                 }
             </div>
             <div>
                 <MudText Class="labelText">Пол<span style="visibility: @visible"> *</span></MudText>
-                <MudSelect T="string" Label="Пол" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
-                    @foreach (var g in genders)
-                    {
-                        <MudSelectItem Value="@(g.Title)" />
-                    }
-                </MudSelect>
+                @if (edit)
+                {
+                    <input @bind-value="gender" readonly="@edit" />
+                }
+                else
+                {
+                    <MudSelect T="string" Label="Пол" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+                        @foreach (var g in genders)
+                        {
+                            <MudSelectItem Value="@(g.Title)" />
+                        }
+                    </MudSelect>
+                }
             </div>
             <div>
                 <MudText Class="labelText">Должность<span style="visibility: @visible"> *</span></MudText>
-                <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" @bind-Value="employeeRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
-                    @foreach (var role in roles)
-                    {
-                        <MudSelectItem Value="@(role.Title)" />
-                    }
-                </MudSelect>
+                @if (edit)
+                {
+                    <input @bind-value="employeeRole" readonly="@edit" />
+                }
+                else
+                {
+                    <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" @bind-Value="employeeRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+                        @foreach (var role in roles)
+                        {
+                            <MudSelectItem Value="@(role.Title)" />
+                        }
+                    </MudSelect>
+                }
             </div>
         </div>
     </div>
@@ -184,7 +199,7 @@
 
     private bool edit = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         currentUser = ZooContext.Users.FirstOrDefault(x => x.Id == int.Parse(currentEmployeeId));
         roles = ZooContext.Roles.ToList();
@@ -236,7 +251,7 @@
 
         if (!result.Canceled)
         {
-            currentUser.IsDeleted = false;
+            currentUser.IsDeleted = true;
             ZooContext.Users.Update(currentUser);
             ZooContext.SaveChanges();
             Snackbar.Add("Сотрудник успешно удален!", Severity.Success, config => { config.ShowCloseIcon = false; });

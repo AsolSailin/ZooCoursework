@@ -242,7 +242,7 @@
             ZooContext.Animals.Update(currentAnimal);
             ZooContext.SaveChanges();
             Snackbar.Add("Животное успешно удалено!", Severity.Success, config => { config.ShowCloseIcon = false; });
-            Navigation.NavigateTo("/animals_list");
+            Navigation.NavigateTo("/aviary_list");
         }
     }
 

@@ -198,9 +198,13 @@
 
     private string GetImage(User user) => $"/images/Users/{user.Image}";
 
-    private void ListUpdate() => users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
-
     private void GetUser(User user) => Navigation.NavigateTo($"/employee_page/{user.Id}");
+
+    private void ListUpdate() 
+    {
+        users = ZooContext.Users.Where(x => x.RoleId != 1 && x.IsDeleted == false).ToList();
+        users.Reverse();
+    }
 
     private void OpenAddDialog()
     {
@@ -214,12 +218,12 @@
 
         if (currentRole == "Все")
         {
-            users = ZooContext.Users.Where(x => x.RoleId != 1).ToList();
+            ListUpdate();
             return;
         }
 
         var roleId = ZooContext.Roles.FirstOrDefault(x => x.Title == currentRole).Id;
-        users = ZooContext.Users.Where(x => x.RoleId == roleId).ToList();
+        users = ZooContext.Users.Where(x => x.RoleId == roleId && x.IsDeleted == false).ToList();
     }
 
     private void Add()

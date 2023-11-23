@@ -235,7 +235,7 @@
         }
 
         var aviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Title == currentAviary).Id;
-        animals = ZooContext.Animals.Where(x => x.AviaryId == aviaryId).ToList();
+        animals = ZooContext.Animals.Where(x => x.AviaryId == aviaryId && x.IsDeleted == false).ToList();
     }
 
     private void GetKind(string selected)
