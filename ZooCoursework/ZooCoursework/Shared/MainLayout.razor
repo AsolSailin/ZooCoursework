@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@using ZooCoursework.Services
+@inject CurrentElementService CurrentElement
+@inject NavigationManager Navigation
 
 <PageTitle>ZooCoursework</PageTitle>
 
@@ -17,19 +20,26 @@
     }
 </style>
 
+<CascadingValue Value="this">
 <MudLayout Class="back">
     <MudAppBar Class="appBar">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Link="https://localhost:7222/account" Target="_blank" />
+        @if (CurrentElement.CurrentUser != null)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="GetAccount" Target="_blank" />
+            <MudIconButton Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Inherit" OnClick="Exit" Target="_blank"  />
+        }
     </MudAppBar>
     <MudDrawer @bind-Open="@open" Breakpoint="Breakpoint.Xxl" ClipMode="DrawerClipMode.Never" Variant="@DrawerVariant.Responsive" >
         <MudDrawerHeader>
             <MudImage Src="/images/Лого.png" Class="logo"></MudImage><MudText Typo="Typo.h6" Class="text">САФАРИ</MudText>
         </MudDrawerHeader>
-        <MudNavMenu>
-            <NavMenu />
+        
+            <MudNavMenu>
+                <NavMenu @ref="@_navMenu" />
         </MudNavMenu>
+        
     </MudDrawer>
     <MudMainContent >
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
@@ -37,6 +47,7 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+</CascadingValue>
 
 <MudThemeProvider Theme="_currentTheme" />
 <MudDialogProvider FullWidth="true"
@@ -49,6 +60,18 @@
 
 @code {
     bool open = false;
+    private NavMenu? _navMenu;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_navMenu is not null)
+            _navMenu.Update = true;
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void GetAccount() => Navigation.NavigateTo("/account");
+
+    private void Exit() => Navigation.NavigateTo("/authorization");
 
     private readonly MudTheme _currentTheme = new()
         {
@@ -61,7 +84,7 @@
                 White = "#FFFFFF",
                 Secondary = "#00FF00",
                 Tertiary = "#0000FF",
-                Success = "#00FFFF",
+                Success = "#21A77F",
                 Info = "#FFFF00",
                 Warning = "#FF00FF",
                 Error = "#C0C0C0",

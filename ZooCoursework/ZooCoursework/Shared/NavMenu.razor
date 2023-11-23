@@ -1,25 +1,44 @@
-﻿<style>
+﻿@using ZooCoursework.DataBase
+@using ZooCoursework.Services
+@inject ZooCourseworkContext ZooContext
+@inject CurrentElementService CurrentElement
+
+<style>
     .text{
         color: #21A77F;
     }
 </style>
 
 <MudNavMenu>
-    <MudNavLink Class="text" Href="/animals_list">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Животные
-    </MudNavLink>
-    <MudNavLink Class="text" Href="/aviary_list">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Вольеры
-    </MudNavLink>
-    <MudNavLink Class="text" Href="/employees_list">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Сотрудники
-    </MudNavLink>
-    <MudNavLink Class="text" Href="/report_list">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Отчеты
-    </MudNavLink>
-    <MudNavLink Class="text" Href="/materials_list">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Склад
-    </MudNavLink>
+    @if(CurrentElement.CurrentUser != null)
+    {
+        @if (CurrentElement.CurrentRole == "Администратор")
+        {
+            <MudNavLink Class="text" Href="/animals_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Животные
+            </MudNavLink>
+            <MudNavLink Class="text" Href="/aviary_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Вольеры
+            </MudNavLink>
+            <MudNavLink Class="text" Href="/employees_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Сотрудники
+            </MudNavLink>
+            <MudNavLink Class="text" Href="/report_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Отчеты
+            </MudNavLink>
+            @*<MudNavLink Class="text" Href="/materials_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Склад
+            </MudNavLink>*@
+        }
+        else if (CurrentElement.CurrentRole == "Дрессировщик")
+        {
+            <MudNavLink Class="text" Href="/report_list">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Отчеты
+            </MudNavLink>
+        }
+    }
+
+    
     @*<MudNavLink Class="text" Href="/billing" Disabled="true">
         <span class="oi oi-list-rich" aria-hidden="true"></span> Страница 2
     </MudNavLink>
@@ -34,7 +53,13 @@
 </MudNavMenu>
 
 @code {
-    private bool isExpanded = true;
+    public bool Update
+    {
+        get => true;
+        set => StateHasChanged();
+    }
+
+    //private bool isExpanded = true;
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;

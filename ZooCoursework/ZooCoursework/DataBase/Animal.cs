@@ -17,6 +17,8 @@ public partial class Animal
 
     public int? AviaryId { get; set; }
 
+    public bool? IsDeleted { get; set; }
+
     public virtual ICollection<AnimalMaterial> AnimalMaterials { get; set; } = new List<AnimalMaterial>();
 
     public virtual Aviary? Aviary { get; set; }

@@ -139,6 +139,9 @@ public partial class ZooCourseworkContext : DbContext
             entity.ToTable("Aviary");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Image)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.KindId).HasColumnName("Kind_Id");
             entity.Property(e => e.Title)
                 .HasMaxLength(50)

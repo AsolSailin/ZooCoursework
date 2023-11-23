@@ -6,5 +6,6 @@ namespace ZooCoursework.Services
     {
         public Account? CurrentAccount { get; set; }
         public User? CurrentUser { get; set; }
+        public string? CurrentRole { get; set; }
     }
 }

@@ -46,9 +46,10 @@
 <div style="position:absolute">
     <MudGrid Spacing="@spacing" Justify="Justify.FlexStart"
              Style="position: absolute;
-        left: 190px;
+        left: 80px;
+        margin-right: auto;
         top: 100px;
-        width: 1000px;
+        width: 1200px;
         box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;
         border-radius: 30px;
         background-color: #EEFFF7;
@@ -56,10 +57,11 @@
         @foreach (var aviary in aviaries)
         {
             <MudItem>
-                <MudPaper Height="100px" Width="210px" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
+                <MudPaper Height="270px" Width="260px" Class="d-flex align-center justify-center mud-width-full py-8" Style="background-color: #A68EFE; box-shadow: none; border-radius: 20px;">
                     <a @onclick="() => GetAviary(aviary)">
-                        <MudPaper Height="100px" Width="210px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
-                            <MudText Class="d-flex align-center justify-center mud-width-full py-8" Style="font-size: 25px; font-weight: 500;">@aviary.Title</MudText>
+                        <MudPaper Height="270px" Width="260px" Style="border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px; border-radius: 20px;">
+                            <img src="@GetImage(aviary)" style="height:200px; width:100%; background-color: #EEFFF7; border-radius: 17px 17px 0 0;" />
+                            <MudText Class="titleText">@aviary.Title</MudText>
                         </MudPaper>
                     </a>
                 </MudPaper>
@@ -83,6 +85,8 @@
         kinds.Add(_allKinds);
         aviaries = ZooContext.Aviaries.ToList();
     }
+
+    private string GetImage(Aviary aviary) => $"/images/Animals/{aviary.Image}";
 
     private void GetAviary(Aviary aviary) => Navigation.NavigateTo($"/aviary_page/{aviary.Id}");
 

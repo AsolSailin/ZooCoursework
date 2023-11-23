@@ -1,6 +1,8 @@
 ﻿@page "/report_list"
 @using ZooCoursework.DataBase
-@using System.Globalization;
+@using System.Globalization
+@using ZooCoursework.Services
+@inject CurrentElementService CurrentElement
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -50,42 +52,81 @@
     }
 </style>
 
-<MudPaper Class="paper">
-    <MudText Class="mainLabelText">Список отчетов</MudText>
-    <div>
-        <MudDatePicker Style="width: 25%; margin-left: auto; margin-right: auto; " Editable="true" Date="date" ImmediateText="true" Placeholder="день.месяц.год" DateFormat="@dateFormat" TextChanged="DatePickerTextChanged" Clearable="true" />
-        @*<MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="selectRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
-            @foreach (var role in roles)
-            {
-                <MudSelectItem Value="@(role.Title)" />
-            }
+@if (ZooContext.Roles.FirstOrDefault(x => x.Id == CurrentElement.CurrentUser.RoleId).Title == "Администратор")
+{
+    <MudPaper Class="paper">
+        <MudText Class="mainLabelText">Список отчетов</MudText>
+        <div>
+            <MudDatePicker Style="width: 25%; margin-left: auto; margin-right: auto; " Editable="true" Date="date" ImmediateText="true" Placeholder="день.месяц.год" DateFormat="@dateFormat" TextChanged="DatePickerTextChanged" Clearable="true" />
+            @*<MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="selectRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+        @foreach (var role in roles)
+        {
+        <MudSelectItem Value="@(role.Title)" />
+        }
         </MudSelect>*@
-    </div>
-    <div class="mainBlock">
-        <div class="tableBlock" style="overflow: scroll; height: 379px; width: 700px; margin-left: auto; margin-right: auto;">
-            <MudTable Items="@reportsList" T="Report" Hover="true" @bind-SelectedItem="selectedItem" OnRowClick="@GetReport" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
-                <RowTemplate>
-                    <MudTd DataLabel="Title" Style="font-size: 20px; margin-right: 0px">Отчет № @context.Id за @context.Date.ToString("d")</MudTd>
-                    <MudTd DataLabel="Title" Style="font-size: 20px;">@GetFullName(context)</MudTd>
-                    @if(context.IsAccepted)
-                    {
-                        <MudTd DataLabel="Title" Style="font-size: 20px;">Принят</MudTd>
-                    }
-                    else
-                    {
-                        <MudTd DataLabel="Title" Style="font-size: 20px;">-----</MudTd>
-                    }
-                </RowTemplate>
-            </MudTable>
         </div>
-    </div>
-</MudPaper>
+        <div class="mainBlock">
+            <div class="tableBlock" style="overflow: scroll; height: 379px; width: 700px; margin-left: auto; margin-right: auto;">
+                @if (reportsList.Count == 0)
+                {
+                    <MudText Style="margin-left: auto; margin-right: auto; font-size: 30px; text-align: center; margin-top: 150px;">На эту дату пока нет отчетов</MudText>
+                }
+                else
+                {
+                    <MudTable Items="@reportsList" T="Report" Hover="true" @bind-SelectedItem="selectedItem" OnRowClick="@GetReport" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+                        <RowTemplate>
+                            <MudTd DataLabel="Title" Style="font-size: 20px; margin-right: 0px">Отчет № @context.Id за @context.Date.ToString("d")</MudTd>
+                            <MudTd DataLabel="Title" Style="font-size: 20px;">@GetFullName(context)</MudTd>
+                            @if (context.IsAccepted)
+                            {
+                                <MudTd DataLabel="Title" Style="font-size: 20px;">Принят</MudTd>
+                            }
+                            else
+                            {
+                                <MudTd DataLabel="Title" Style="font-size: 20px;">-----</MudTd>
+                            }
+                        </RowTemplate>
+                    </MudTable>
+                }
+            </div>
+        </div>
+    </MudPaper>
+}
+else if (ZooContext.Roles.FirstOrDefault(x => x.Id == CurrentElement.CurrentUser.RoleId).Title == "Дрессировщик")
+{
+    <MudPaper Class="paper">
+        <MudText Class="mainLabelText">Мои отчеты</MudText>
+        <div>
+            <MudButton Variant="Variant.Outlined" Style="bottom: 30px; border-radius: 10px; height: 30px; font-size: 18px; border: 3px solid #21A77F; color: #21A77F; width: 25%; margin-top: 30px;" Class="d-flex mx-auto" >Оформить отчет</MudButton>
+        </div>
+        <div class="mainBlock">
+            <div class="tableBlock" style="overflow: scroll; height: 379px; width: 700px; margin-left: auto; margin-right: auto;">
+                <MudTable Items="@wReportsList" T="Report" Hover="true" @bind-SelectedItem="selectedItem" OnRowClick="@GetReport" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+                    <RowTemplate>
+                        <MudTd DataLabel="Title" Style="font-size: 20px; margin-right: 0px">Отчет № @context.Id за @context.Date.ToString("d")</MudTd>
+                        @if (context.IsAccepted)
+                        {
+                            <MudTd DataLabel="Title" Style="font-size: 20px;">Принят</MudTd>
+                        }
+                        else
+                        {
+                            <MudTd DataLabel="Title" Style="font-size: 20px;">-----</MudTd>
+                        }
+                    </RowTemplate>
+                </MudTable>
+            </div>
+        </div>
+    </MudPaper>
+}
+
+
 
 @code {
     DateTime? date = DateTime.Today;
     string dateFormat = "dd.MM.yyyy";
 
     private List<Report> reportsList = new List<Report>();
+    private List<Report> wReportsList = new List<Report>();
     private List<Role> roles = new List<Role>();
     private List<User> users = new List<User>();
 
@@ -103,9 +144,21 @@
         GetReportList();
     }
 
-    private void GetReportList() => reportsList = ZooContext.Reports.Where(x => x.Date == date).ToList();
-
     private void GetReport() => Navigation.NavigateTo($"/report_page/{selectedItem.Id}");
+
+    private void GetReportRegistration() => Navigation.NavigateTo($"/report_registration");
+
+    private void GetReportList()
+    {
+        @if (ZooContext.Roles.FirstOrDefault(x => x.Id == CurrentElement.CurrentUser.RoleId).Title == "Администратор")
+        {
+            reportsList = ZooContext.Reports.Where(x => x.Date == date).ToList();            
+        }
+        else if (ZooContext.Roles.FirstOrDefault(x => x.Id == CurrentElement.CurrentUser.RoleId).Title == "Кладовщик")
+        {
+            wReportsList = ZooContext.Reports.Where(x => x.UserId == CurrentElement.CurrentUser.Id).ToList();
+        }
+    }
 
     private void DatePickerTextChanged(string value)
     {

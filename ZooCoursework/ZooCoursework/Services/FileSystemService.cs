@@ -12,7 +12,7 @@
                 case "animal":
                     path = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\images\Animals", name);
                     break;
-                case "emloyee":
+                case "user":
                     path = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\images\Users", name);
                     break;
             }

@@ -15,6 +15,8 @@ public partial class Aviary
 
     public int KindId { get; set; }
 
+    public string? Image { get; set; }
+
     public virtual ICollection<Animal> Animals { get; set; } = new List<Animal>();
 
     public virtual AnimalKind Kind { get; set; } = null!;

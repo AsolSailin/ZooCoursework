@@ -65,8 +65,16 @@
 </style>
 
 <MudPaper Class="paper">
-    <div>
+    <div style="display:flex; flex-direction: row;">
         <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Delete">Удалить</MudButton>
+        @if (edit)
+        {
+            <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@GetEdit">Изменить</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Edit">Сохранить изменения</MudButton>
+        }
     </div>
     <div class="mainBlock">
         <div class="imgBlock">
@@ -74,47 +82,75 @@
         </div>
         <div class="fieldsBlock">
             <div>
-                <MudText Class="labelText">Фамилия</MudText>
-                <input @bind-value="currentUser.Surname" />
+                <MudText Class="labelText">Фамилия<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="employeeSurname" readonly="@edit" />
             </div>
             <div>
-                <MudText Class="labelText">Имя</MudText>
-                <input @bind-value="currentUser.Name" />
+                <MudText Class="labelText">Имя<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="employeeName" readonly="@edit" />
             </div>
             <div>
                 <MudText Class="labelText">Отчество</MudText>
-                <input @bind-value="currentUser.Patronymic" />
+                <input @bind-value="employeePatronymic" readonly="@edit" />
             </div>
             <div>
-                <MudText Class="labelText">Должность</MudText>
-                <input @bind-value="role" />
+                <MudText Class="labelText">@identityDoc</MudText>
             </div>
             <div>
-                <MudText Class="labelText">@currentUser.IdentityDocument</MudText>
+                <MudText Class="labelText">Серия<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="series" readonly="@edit" />
             </div>
             <div>
-                <MudText Class="labelText">Серия и номер</MudText>
-                <input @bind-value="@seriesAndNumber" />
+                <MudText Class="labelText">Номер<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="number" readonly="@edit" />
             </div>
             <div>
-                <MudText Class="labelText">Кем выдан</MudText>
-                <input @bind-value="currentUser.IssuedPlace" />
+                <MudText Class="labelText">Кем выдан<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="issuePlace" readonly="@edit" />
             </div>
             <div>
-                <MudText Class="labelText">Код подразделения</MudText>
-                <input @bind-value="currentUser.DivissionCode" />
+                <MudText Class="labelText">Код подразделения<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="divissionCode" />
             </div>
             <div>
-                <MudText Class="labelText">Дата выдачи</MudText>
-                <input @bind-value="@issueDate" />
+                <MudText Class="labelText">Дата выдачи<span style="visibility: @visible"> *</span></MudText>
+                @if (edit)
+                {
+                    <input @bind-value="issueDate" readonly="@edit" />
+                }
+                else
+                {
+                    <MudDatePicker @bind-Date="issueDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;margin-bottom: 50px;" />
+                }
             </div>
             <div>
-                <MudText Class="labelText">Дата рождения</MudText>
-                <input @bind-value="@birthDate" />
+                <MudText Class="labelText">Дата рождения<span style="visibility: @visible"> *</span></MudText>
+                @if (edit)
+                {
+                    <input @bind-value="birthDate" readonly="@edit" />
+                }
+                else
+                {
+                    <MudDatePicker @bind-Date="birthDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;margin-bottom: 50px;" />
+                }
             </div>
             <div>
-                <MudText Class="labelText">Пол</MudText>
-                <input @bind-value="ZooContext.PersonGenders.FirstOrDefault(x => x.Id == currentUser.GenderId).Title" />
+                <MudText Class="labelText">Пол<span style="visibility: @visible"> *</span></MudText>
+                <MudSelect T="string" Label="Пол" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+                    @foreach (var g in genders)
+                    {
+                        <MudSelectItem Value="@(g.Title)" />
+                    }
+                </MudSelect>
+            </div>
+            <div>
+                <MudText Class="labelText">Должность<span style="visibility: @visible"> *</span></MudText>
+                <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" @bind-Value="employeeRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+                    @foreach (var role in roles)
+                    {
+                        <MudSelectItem Value="@(role.Title)" />
+                    }
+                </MudSelect>
             </div>
         </div>
     </div>
@@ -124,29 +160,74 @@
     [Parameter]
     public string? currentEmployeeId { get; set; }
 
+    private List<Role> roles = new List<Role>();
+    private List<PersonGender> genders = new List<PersonGender>();
+
     private User currentUser = new User();
 
-    private string role = "";
-    private string seriesAndNumber = "";
-    private string issueDate = "";
-    private string birthDate = "";
+    private DateTime? issueDate = DateTime.Today;
+    private DateTime? birthDate = DateTime.Today.AddYears(-18);
+
+    private string employeeSurname = "";
+    private string employeeName = "";
+    private string employeePatronymic = "";
+    private string employeeRole = "";
+    private string identityDoc = "";
+    private string series = "";
+    private string number = "";
+    private string issuePlace = "";
+    private string divissionCode = "";
+    private string gender = "";
     private string imagePath = "";
+
+    private string visible = "hidden";
+
+    private bool edit = true;
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = ZooContext.Users.FirstOrDefault(x => x.Id == int.Parse(currentEmployeeId));
+        roles = ZooContext.Roles.ToList();
+        genders = ZooContext.PersonGenders.ToList();
+
         GetFields();
         GetImage();
     }
 
     private void GetImage() => imagePath = $"/images/Users/{currentUser.Image}";
 
+    private void GetEdit() => edit = false;
+
     private void GetFields()
     {
-        seriesAndNumber = $"{currentUser.DocumentSeries} {currentUser.DocumentNumber}";
-        issueDate = currentUser.IssuedDate.Value.ToString("d");
-        birthDate = currentUser.BirthDate.Value.ToString("d");
-        role = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId).Title;
+        employeeSurname = currentUser.Surname;
+        employeeName = currentUser.Name;
+        employeePatronymic = currentUser.Patronymic;
+        employeeRole = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId).Title;
+        identityDoc = currentUser.IdentityDocument;
+        series = (currentUser.DocumentSeries).ToString();
+        number = (currentUser.DocumentNumber).ToString();
+        issueDate = currentUser.IssuedDate;
+        birthDate = currentUser.BirthDate;
+        issuePlace = currentUser.IssuedPlace;
+        divissionCode = currentUser.DivissionCode;
+        gender = ZooContext.PersonGenders.FirstOrDefault(x => x.Id == currentUser.GenderId).Title;
+    }
+
+    private void GetData()
+    {
+        currentUser.Surname = employeeSurname;
+        currentUser.Name = employeeName;
+        currentUser.Patronymic = employeePatronymic;
+        currentUser.RoleId = ZooContext.Roles.FirstOrDefault(x => x.Title == employeeRole).Id;
+        currentUser.IdentityDocument = identityDoc;
+        currentUser.DocumentSeries = int.Parse(series);
+        currentUser.DocumentNumber = int.Parse(number);
+        currentUser.IssuedDate = issueDate;
+        currentUser.BirthDate = birthDate;
+        currentUser.IssuedPlace = issuePlace;
+        currentUser.DivissionCode = divissionCode;
+        currentUser.GenderId = ZooContext.PersonGenders.FirstOrDefault(x => x.Title == gender).Id;
     }
 
     private async Task Delete()
@@ -155,10 +236,92 @@
 
         if (!result.Canceled)
         {
-            ZooContext.Users.Remove(currentUser);
+            currentUser.IsDeleted = false;
+            ZooContext.Users.Update(currentUser);
             ZooContext.SaveChanges();
             Snackbar.Add("Сотрудник успешно удален!", Severity.Success, config => { config.ShowCloseIcon = false; });
             Navigation.NavigateTo("/employees_list");
         }
+    }
+
+    private bool StringIsDigits(string s)
+    {
+        foreach (var item in s)
+        {
+            if (!char.IsDigit(item))
+                return false;
+        }
+        return true;
+    }
+
+    private void Edit()
+    {
+        if (employeeSurname == "" ||
+        employeeName == "" ||
+        employeeRole == "" ||
+        identityDoc == "" ||
+        series == "" ||
+        number == "" ||
+        issuePlace == "" ||
+        divissionCode == "" ||
+        gender == "")
+        {
+            Snackbar.Add("Для изменения данных сотрудника все обязательные поля должны быть заполнены!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
+        if (!StringIsDigits(series) || !StringIsDigits(number) || !StringIsDigits(divissionCode))
+        {
+            if (!StringIsDigits(series))
+            {
+                Snackbar.Add("Серия должна состоять из цифр!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+
+            if (!StringIsDigits(number))
+            {
+                Snackbar.Add("Номер должен состоять из цифр!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+
+            if (!StringIsDigits(divissionCode))
+            {
+                Snackbar.Add("Код подразделения должен состоять из цифр!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+            return;
+        }
+
+        if (series.Length > 4 || series.Length < 4 ||
+            number.Length > 6 || number.Length < 6 ||
+            divissionCode.Length > 6 || divissionCode.Length < 6)
+        {
+            if (series.Length > 4 || series.Length < 4)
+            {
+                Snackbar.Add("Серия должна состоять из 4 чисел!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+
+            if (number.Length > 6 || number.Length < 6)
+            {
+                Snackbar.Add("Номер должен состоять из 6 чисел!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+
+            if (divissionCode.Length > 6 || divissionCode.Length < 6)
+            {
+                Snackbar.Add("Код подразделения должен состоять из 6 чисел!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            }
+            return;
+        }
+
+        if (birthDate > DateTime.Today.AddYears(-18) || issueDate > DateTime.Today)
+        {
+            Snackbar.Add("Даты заполнены некорректно!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
+        GetData();
+        ZooContext.Users.Update(currentUser);
+        ZooContext.SaveChanges();
+        ZooContext.ChangeTracker.Clear();
+        Snackbar.Add("Данные сотрудника успешно изменены!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        visible = "hidden";
+        edit = true;
     }
 }

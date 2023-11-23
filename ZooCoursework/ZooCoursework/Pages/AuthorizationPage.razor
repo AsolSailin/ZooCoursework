@@ -44,15 +44,6 @@
         margin-bottom: 5px;
         margin-left: 7px;
     }
-
-    /*.href {
-        color: #5FCEAD;
-        text-decoration: underline;
-    }
-
-        .href:hover {
-            color: #21A77F;
-        }*/
 </style>
 
 <MudPaper Class="paper">
@@ -83,7 +74,15 @@
 
     protected override void OnInitialized()
     {
+        GetNull();
         initSnakebarPosition(Defaults.Classes.Position.TopCenter);
+    }
+
+    private void GetNull()
+    {
+        CurrentElement.CurrentAccount = null;
+        CurrentElement.CurrentUser = null;
+        CurrentElement.CurrentRole = null;
     }
 
     void initSnakebarPosition(string position)
@@ -100,24 +99,16 @@
             return;
         }
 
-        if (login != "admin" && password != "admin")
+        CurrentElement.CurrentAccount = ZooContext.Accounts.FirstOrDefault(x => x.Login == login && x.Password == password);
+
+        if (CurrentElement.CurrentAccount == null)
         {
             Snackbar.Add("Неверные логин или пароль!", Severity.Error, config => { config.ShowCloseIcon = false; });
             return;
         }
 
-        //Доработанная часть для нескольких ролей
-        var accountDb = ZooContext.Accounts.FirstOrDefault(x => x.Login == login && x.Password == password);
-
-        if (accountDb == null)
-        {
-            Snackbar.Add("Пользователь не существует", Severity.Error, config => { config.ShowCloseIcon = false; });
-            return;
-        }
-
-        CurrentElement.CurrentAccount = accountDb;
-        CurrentElement.CurrentUser = ZooContext.Users.FirstOrDefault(x => x.Id == accountDb.UserId);
-
+        CurrentElement.CurrentUser = ZooContext.Users.FirstOrDefault(x => x.Id == CurrentElement.CurrentAccount.UserId);
+        CurrentElement.CurrentRole = ZooContext.Roles.FirstOrDefault(x => x.Id == CurrentElement.CurrentUser.RoleId).Title;
         Navigation.NavigateTo("/account");
     }
 }

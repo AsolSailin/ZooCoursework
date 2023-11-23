@@ -1,8 +1,10 @@
 ﻿@page "/animal_page/{currentAnimalId}"
 @using ZooCoursework.DataBase
+@using ZooCoursework.Services
 @using ZooCoursework.RazorComponents;
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
+@inject FileSystemService FileSystemService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -42,7 +44,11 @@
     .fieldsBlock {
         flex: 50%;
         margin-bottom: 30px;
+        margin-right: 50px;
         margin-left: 50px;
+        height: 400px;
+        width: 300px;
+        overflow-y: scroll;
     }
 
     .imgBlock {
@@ -52,32 +58,77 @@
         width: 400px;
         height: 400px;
     }
+
+    .camera {
+        background-color: #21A77F;
+        left: 170px;
+        bottom: 50px;
+    }
 </style>
 
 <MudPaper Class="paper">
-    <div>
+    <div style="display:flex; flex-direction: row;">
         <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Delete">Удалить</MudButton>
+        @if(edit)
+        {
+            <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@GetEdit" >Изменить</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Outlined" Style="border-radius: 10px; top: 6px; height: 63px; font-size: 16px; border: 3px solid #21A77F; color: #21A77F; left:7px;" OnClick="@Edit" >Сохранить изменения</MudButton>
+        }
     </div>
     <div class="mainBlock">
         <div class="imgBlock">
             <MudAvatar Style="height:400px; width:400px; background-color: #EEFFF7; border: 3px solid #21A77F; box-shadow: rgb(38, 57, 77) 0px 5px 10px -0px;" Image="@imagePath"></MudAvatar>
+            <MudFileUpload T="IBrowserFile" OnFilesChanged="LoadFiles">
+                <ButtonTemplate>
+                    <MudIconButton HtmlTag="label"
+                                   Icon="@Icons.Material.Filled.PhotoCamera"
+                                   for="@context" Class="camera" Disabled="@edit">
+                    </MudIconButton>
+                </ButtonTemplate>
+            </MudFileUpload>
         </div>
         <div class="fieldsBlock">
             <div>
-                <MudText Class="labelText">Имя</MudText>
-                <input @bind-value="currentAnimal.Name" />
-            </div>
-            <div>
-                <MudText Class="labelText">Дата рождения </MudText>
-                <input @bind-value="@date"/>
-            </div>
-            <div>
-                <MudText Class="labelText">Вид</MudText>
-                <input @bind-value="kind" />
+                <MudText Class="labelText">Пол<span style="visibility: @visible"> *</span></MudText>
+                @if (edit)
+                {
+                    <input @bind-value="gender" readonly="@edit" />
+                }
+                else
+                {
+                    <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 20px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
+                        @foreach (var g in genders)
+                        {
+                            <MudSelectItem Value="@(g.Title)" />
+                        }
+                    </MudSelect>
+                }
             </div>
             <div>
                 <MudText Class="labelText">Вольер</MudText>
-                <input @bind-value="aviary.Title" />
+                <input @bind-value="animalAviary" readonly="true" />
+            </div>
+            <div>
+                <MudText Class="labelText">Вид</MudText>
+                <input @bind-value="kind" readonly="true" />
+            </div>
+            <div>
+                <MudText Class="labelText">Имя<span style="visibility: @visible"> *</span></MudText>
+                <input @bind-value="name" readonly="@edit"  />
+            </div>
+            <div>
+                <MudText Class="labelText">Дата рождения<span style="visibility: @visible"> *</span></MudText>
+                @if (edit)
+                {
+                    <input @bind-value="date" readonly="@edit" />
+                }
+                else
+                {
+                    <MudDatePicker @bind-Date="animalBirthDate" DisableToolbar="true" Style="width: 395px; margin-left: 10px;margin-bottom: 50px;" />                    
+                }
             </div>
         </div>
     </div>
@@ -87,23 +138,63 @@
     [Parameter]
     public string? currentAnimalId { get; set; }
 
+    private List<Aviary> aviaries = new List<Aviary>();
+    private List<AnimalGender> genders = new List<AnimalGender>();
+
     private Aviary aviary = new Aviary();
     private Animal currentAnimal = new Animal();
 
+    private DateTime? animalBirthDate = new DateTime();
+
+    private string name = "";
+    private string animalAviary = "";
     private string kind = "";
     private string date = "";
     private string imagePath = "";
+    private string animalImage = "";
+    private string gender = "";
+
+    private string visible = "hidden";
+
+    private bool edit = true;
 
     protected override void OnInitialized()
     {
         currentAnimal = ZooContext.Animals.FirstOrDefault(x => x.Id == int.Parse(currentAnimalId));
         aviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == currentAnimal.AviaryId);
-        kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == aviary.KindId).Title;
+
+        aviaries = ZooContext.Aviaries.ToList();
+        genders = ZooContext.AnimalGenders.ToList();
+
+        GetFields();
         GetDate();
-        GetImage();
     }
 
-    private void GetImage() => imagePath = $"/images/Animals/{currentAnimal.Image}";
+    private void GetEdit()
+    {
+        visible = "visible";
+        edit = false;
+    }
+
+    private void GetFields()
+    {
+        animalAviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == currentAnimal.AviaryId).Title;
+        gender = ZooContext.AnimalGenders.FirstOrDefault(x => x.Id == currentAnimal.GenderId).Title; 
+        kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == aviary.KindId).Title;
+        name = currentAnimal.Name;
+        animalBirthDate = currentAnimal.BirthDate;
+        animalImage = currentAnimal.Image;
+        imagePath = $"/images/Animals/{currentAnimal.Image}";
+    }
+
+    private void GetData()
+    {
+        currentAnimal.AviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Title == animalAviary).Id;
+        currentAnimal.GenderId = ZooContext.AnimalGenders.FirstOrDefault(x => x.Title == gender).Id;
+        currentAnimal.Name = name;
+        currentAnimal.BirthDate = (DateTime)animalBirthDate;
+        currentAnimal.Image = animalImage;
+    }
 
     private void GetDate()
     {
@@ -117,7 +208,28 @@
         else if(age >= 2 && age <= 4) year = "года";
         else year = "лет";
 
-        date = $"{currentAnimal.BirthDate.ToString("d")} ({age.ToString()} {year})";
+        if (age < 1) date = $"{currentAnimal.BirthDate.ToString("d")} ({year})";
+        else date = $"{currentAnimal.BirthDate.ToString("d")} ({age.ToString()} {year})";
+    }
+
+    private void GetKind(string selected)
+    {
+        animalAviary = selected;
+        var aviary = ZooContext.Aviaries.FirstOrDefault(x => x.Title == animalAviary);
+        var kindId = aviary.KindId;
+        kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == kindId).Title;
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            Stream stream = file.OpenReadStream(5000000000);
+            await FileSystemService.UploadFileAsync(file.Name, stream, "animal");
+            animalImage = file.Name;
+            await stream.DisposeAsync();
+            imagePath = $"/images/Animals/{file.Name}";
+        }
     }
 
     private async Task Delete()
@@ -126,11 +238,37 @@
 
         if (!result.Canceled)
         {
-            ZooContext.Animals.Remove(currentAnimal);
+            currentAnimal.IsDeleted = true;
+            ZooContext.Animals.Update(currentAnimal);
             ZooContext.SaveChanges();
             Snackbar.Add("Животное успешно удалено!", Severity.Success, config => { config.ShowCloseIcon = false; });
             Navigation.NavigateTo("/animals_list");
         }
+    }
+
+    private void Edit()
+    {
+        if (gender == "" ||
+        name == "")
+        {
+            Snackbar.Add("Для изменения данных животного все обязательные поля должны быть заполнены!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
+        if (animalBirthDate > DateTime.Today)
+        {
+            Snackbar.Add("Дата заполнена некорректно!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
+        GetData();
+        ZooContext.Animals.Update(currentAnimal);
+        ZooContext.SaveChanges();
+        ZooContext.ChangeTracker.Clear();
+        Snackbar.Add("Данные животного успешно изменены!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        GetDate();
+        visible = "hidden";
+        edit = true;
     }
 }
 

@@ -78,9 +78,9 @@
                 <input @bind-value="kind" />
             </div>
         </div>
-        <div class="tableBlock" style="overflow: scroll;">
+        <div class="tableBlock" >
             <MudText Class="labelText">Список животных в вольере:</MudText>
-            <MudTable T="Animal" Items="@animalsList" @bind-SelectedItem="selectedItem" OnRowClick="@OnRowClick" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; ">
+            <MudTable T="Animal" Items="@animalsList" @bind-SelectedItem="selectedItem" OnRowClick="@OnRowClick" Hover="true" Style="border: solid 1px #5FCEAD; border-radius: 5px; overflow: scroll; height: 317px">
                 <RowTemplate>
                     <MudTd DataLabel="Title" Style="font-size: 20px;">@context.Name</MudTd>
                 </RowTemplate>
@@ -106,7 +106,7 @@
     protected override void OnInitialized()
     {
         currentAviary = ZooContext.Aviaries.FirstOrDefault(x => x.Id == int.Parse(currentAviaryId));
-        animalsList = ZooContext.Animals.Where(x => x.AviaryId == int.Parse(currentAviaryId)).ToList();
+        animalsList = ZooContext.Animals.Where(x => x.AviaryId == int.Parse(currentAviaryId) && x.IsDeleted == false).ToList();
         type = ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == currentAviary.TypeId).Title;
         kind = ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == currentAviary.KindId).Title;
     }

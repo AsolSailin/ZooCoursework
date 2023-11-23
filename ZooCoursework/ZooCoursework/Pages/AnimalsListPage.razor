@@ -137,17 +137,17 @@
 
             <div class="fieldsBlock">
                 <div>
-                    <MudText Class="labelText">Вольер</MudText>
-                    <MudSelect T="string" Variant="Variant.Outlined" ValueChanged="GetKind" Value="animalAviary" Style="font-size: 16px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
-                        @foreach (var aviary in aviaries)
+                    <MudText Class="labelText">Вольер<span> *</span></MudText>
+                    <MudSelect T="string" Variant="Variant.Outlined" ValueChanged="GetKind" Value="animalAviary" Style="font-size: 15px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
+                        @foreach (var aviary in addAviaries)
                         {
                             <MudSelectItem Value="@(aviary.Title)" />
                         }
                     </MudSelect>
                 </div>
                 <div>
-                    <MudText Class="labelText">Пол</MudText>
-                    <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 16px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
+                    <MudText Class="labelText">Пол<span style="visibility: @visible"> *</span></MudText>
+                    <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="gender" Style="font-size: 15px; border: 3px solid #5FCEAD; color: #5FCEAD; border-radius: 10px; ">
                         @foreach (var g in genders)
                         {
                             <MudSelectItem Value="@(g.Title)" />
@@ -159,7 +159,7 @@
                     <input @bind-value="animalKind" readonly="true"/>
                 </div>
                 <div>
-                    <MudText Class="labelText">Имя</MudText>
+                    <MudText Class="labelText">Имя<span style="visibility: @visible"> *</span></MudText>
                     <input @bind-value="animalName" />
                 </div>
                 <div>
@@ -179,6 +179,7 @@
 
     private List<Animal> animals = new List<Animal>();
     private List<Aviary> aviaries = new List<Aviary>();
+    private List<Aviary> addAviaries = new List<Aviary>();
     private List<AnimalGender> genders = new List<AnimalGender>();
     private static readonly Aviary _allAviaries = new Aviary() { Title = "Все" };
 
@@ -196,22 +197,32 @@
 
     protected override void OnInitialized()
     {
+        addAviaries = ZooContext.Aviaries.ToList();
         aviaries = ZooContext.Aviaries.ToList();
-        genders = ZooContext.AnimalGenders.ToList();
         aviaries.Add(_allAviaries);
-        animals = ZooContext.Animals.ToList();
-        animals.Reverse();
+
+        genders = ZooContext.AnimalGenders.ToList();
+
+        GetAnimalsList();
     }
 
     private string GetImage(Animal animal) => $"/images/Animals/{animal.Image}";
 
     private void GetAnimal(Animal animal) => Navigation.NavigateTo($"/animal_page/{animal.Id}");
 
-    private void ListUpdate() => animals = ZooContext.Animals.ToList();
-
-    private void OpenAddDialog() => visible = true;
-
     private void Update() => animals.Clear();
+
+    private void OpenAddDialog()
+    {
+        GetNull();
+        visible = true;
+    }
+
+    private void GetAnimalsList()
+    {
+        animals = ZooContext.Animals.Where(x => x.IsDeleted == false).ToList();
+        animals.Reverse();
+    }
 
     private void GetAviary(string selected)
     {
@@ -219,7 +230,7 @@
 
         if (currentAviary == "Все")
         {
-            animals = ZooContext.Animals.ToList();
+            GetAnimalsList();
             return;
         }
 
@@ -249,6 +260,20 @@
 
     private void Add()
     {
+        if (animalName == "" ||
+        animalAviary == "" ||
+        gender == "")
+        {
+            Snackbar.Add("Для добавления животного все обязательные поля должны быть заполнены!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
+        if(animalBirthDate > DateTime.Today)
+        {
+            Snackbar.Add("Дата заполнена некорректно!", Severity.Error, config => { config.ShowCloseIcon = false; });
+            return;
+        }
+
         var crntGender = ZooContext.AnimalGenders.FirstOrDefault(x => x.Title == gender).Id;
 
         var newAnimal = new Animal()
@@ -257,16 +282,18 @@
             BirthDate = (DateTime)animalBirthDate,
             Image = animalImage,
             AviaryId = ZooContext.Aviaries.FirstOrDefault(x => x.Title == animalAviary).Id,
-            GenderId = crntGender
+            GenderId = crntGender,
+            IsDeleted = false
         };
 
         ZooContext.Animals.Add(newAnimal);
         ZooContext.SaveChanges();
+        ZooContext.ChangeTracker.Clear();
 
-        Snackbar.Add("Животное успешно добавлено!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        Snackbar.Add("Животное успешно добавлено в зоопарк!", Severity.Success, config => { config.ShowCloseIcon = false; });
         visible = false;
         GetNull();
-        ListUpdate();
+        GetAnimalsList();
     }
 
     private void GetNull()
@@ -277,5 +304,6 @@
         animalAviary = "";
         animalKind = "";
         animalBirthDate = DateTime.Today;
+        gender = "";
     }
 }

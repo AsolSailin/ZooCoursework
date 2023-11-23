@@ -1,5 +1,7 @@
 ﻿@page "/report_page/{currentReportId}"
 @using ZooCoursework.DataBase
+@using ZooCoursework.RazorComponents
+@inject IDialogService DialogService
 @inject ZooCourseworkContext ZooContext
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -155,7 +157,7 @@
     private User currentUser = new User();
     private Aviary currentAviary = new Aviary();
     private Role currentRole = new Role();
-    
+
     public string[] labels = new string[] { };
     public double[] data = new double[] { };
 
@@ -167,7 +169,7 @@
         currentRole = ZooContext.Roles.FirstOrDefault(x => x.Id == currentUser.RoleId);
 
         aviariesList = ZooContext.Aviaries.Where(x => x.Id == currentReport.AviaryId).ToList();
-        animalsList = ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id).ToList();
+        animalsList = ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id && x.IsDeleted == false).ToList();
 
         switch(currentRole.Title)
         {
@@ -205,19 +207,24 @@
         labels = labelsList.ToArray();
     }
 
-        private string GetType(Aviary context) => ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == context.TypeId).Title;
+    private string GetType(Aviary context) => ZooContext.TypeAviaries.FirstOrDefault(x => x.Id == context.TypeId).Title;
 
-        private string GetKind(Aviary context) => ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == context.KindId).Title;
+    private string GetKind(Aviary context) => ZooContext.AnimalKinds.FirstOrDefault(x => x.Id == context.KindId).Title;
 
-        private string GetCount(Aviary context) => ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id).ToList().Count.ToString();
+    private string GetCount(Aviary context) => ZooContext.Animals.Where(x => x.AviaryId == currentAviary.Id && x.IsDeleted == false).ToList().Count.ToString();
 
-    private void GetAccept()
+    private async Task GetAccept()
     {
-        currentReport.IsAccepted = true;
-        ZooContext.Reports.Update(currentReport);
-        ZooContext.SaveChanges();
-        Snackbar.Add("Отчет принят!", Severity.Success, config => { config.ShowCloseIcon = false; });
-        Navigation.NavigateTo($"/report_list");
+        var result = await DialogService.Show<AcceptDialog>($"Вы уверены, что хотите принять этот отчет?").Result;
+
+        if (!result.Canceled)
+        {
+            currentReport.IsAccepted = true;
+            ZooContext.Reports.Update(currentReport);
+            ZooContext.SaveChanges();
+            Snackbar.Add("Отчет принят!", Severity.Success, config => { config.ShowCloseIcon = false; });
+            Navigation.NavigateTo($"/report_list");
+        }
     }
 }
 

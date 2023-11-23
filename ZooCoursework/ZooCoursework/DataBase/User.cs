@@ -35,6 +35,8 @@ public partial class User
 
     public string? Image { get; set; }
 
+    public bool? IsDeleted { get; set; }
+
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
     public virtual PersonGender? Gender { get; set; }
