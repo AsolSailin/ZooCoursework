@@ -117,7 +117,7 @@
                 <MudText Class="labelText">Дата выдачи<span style="visibility: @visible"> *</span></MudText>
                 @if (edit)
                 {
-                    <input @bind-value="issueDate" readonly="@edit" />
+                    <input @bind-value="issueDateStr" readonly="@edit" />
                 }
                 else
                 {
@@ -128,7 +128,7 @@
                 <MudText Class="labelText">Дата рождения<span style="visibility: @visible"> *</span></MudText>
                 @if (edit)
                 {
-                    <input @bind-value="birthDate" readonly="@edit" />
+                    <input @bind-value="birthDateStr" readonly="@edit" />
                 }
                 else
                 {
@@ -183,6 +183,9 @@
     private DateTime? issueDate = DateTime.Today;
     private DateTime? birthDate = DateTime.Today.AddYears(-18);
 
+    private string issueDateStr = "";
+    private string birthDateStr = "";
+
     private string employeeSurname = "";
     private string employeeName = "";
     private string employeePatronymic = "";
@@ -207,6 +210,7 @@
 
         GetFields();
         GetImage();
+        GetDate();
     }
 
     private void GetImage() => imagePath = $"/images/Users/{currentUser.Image}";
@@ -267,6 +271,20 @@
                 return false;
         }
         return true;
+    }
+
+    private void GetDate()
+    {
+        var age = DateTime.Today.Year - currentUser.BirthDate.Value.Year;
+        var lastDigit = age % 10;
+        var year = "";
+
+        if (lastDigit == 1) year = "год";
+        else if (lastDigit >= 2 && lastDigit <= 4) year = "года";
+        else year = "лет";
+
+        birthDateStr = $"{currentUser.BirthDate.Value.ToString("d")} ({age.ToString()} {year})";
+        issueDateStr = currentUser.IssuedDate.Value.ToString("d");
     }
 
     private void Edit()
@@ -336,6 +354,7 @@
         ZooContext.SaveChanges();
         ZooContext.ChangeTracker.Clear();
         Snackbar.Add("Данные сотрудника успешно изменены!", Severity.Success, config => { config.ShowCloseIcon = false; });
+        GetDate();
         visible = "hidden";
         edit = true;
     }

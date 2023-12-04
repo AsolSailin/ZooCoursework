@@ -64,7 +64,7 @@
 </style>
 
 <div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
-    <MudSelect T="string" Label="Вид животных" Variant="Variant.Outlined" ValueChanged="GetKind" Value="currentKind" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
+    <MudSelect T="string" Label="Вид животных" Variant="Variant.Outlined" ValueChanged="GetKindFilt" Value="currentKind" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
         @foreach (var kind in kinds)
         {
             <MudSelectItem Value="@(kind.Title)" />
@@ -203,6 +203,20 @@
     {
         GetNull();
         visible = true;
+    }
+
+    private void GetKindFilt(string selected)
+    {
+        currentKind = selected;
+
+        if (currentKind == "Все")
+        {
+            aviaries = ZooContext.Aviaries.ToList();
+            return;
+        }
+
+        var kindId = ZooContext.AnimalKinds.FirstOrDefault(x => x.Title == currentKind).Id;
+        aviaries = ZooContext.Aviaries.Where(x => x.KindId == kindId).ToList();
     }
 
     private void GetKind(string selected)

@@ -45,7 +45,7 @@
 
 <div style="position: absolute; left: 190px; width: 1000px;display: flex; flex-direction: row; justify-content: flex-start;">
     <MudSelect T="string" Label="Должность" Variant="Variant.Outlined" ValueChanged="GetRole" Value="currentRole" Style="font-size: 16px; border: 3px solid #21A77F; color: #21A77F; border-radius: 10px; ">
-        @foreach (var role in roles)
+        @foreach (var role in rolesFilt)
         {
             <MudSelectItem Value="@(role.Title)" />
         }
@@ -165,6 +165,7 @@
     private int spacing { get; set; } = 5;
 
     private List<User> users = new List<User>();
+    private List<Role> rolesFilt = new List<Role>();
     private List<Role> roles = new List<Role>();
     private List<PersonGender> genders = new List<PersonGender>();
     private static readonly Role _allRoles = new Role() { Title = "Все" };
@@ -190,10 +191,11 @@
 
     protected override void OnInitialized()
     {
-        roles = ZooContext.Roles.ToList();
+        rolesFilt = ZooContext.Roles.Where(x => x.Title != "Администратор").ToList();
+        roles = ZooContext.Roles.Where(x => x.Title != "Администратор").ToList();
         genders = ZooContext.PersonGenders.ToList();
-        roles.Add(_allRoles);
-        users = ZooContext.Users.Where(x => x.RoleId != 1 && x.IsDeleted == false).ToList();
+        rolesFilt.Add(_allRoles);
+        ListUpdate();
     }
 
     private string GetImage(User user) => $"/images/Users/{user.Image}";
@@ -224,6 +226,7 @@
 
         var roleId = ZooContext.Roles.FirstOrDefault(x => x.Title == currentRole).Id;
         users = ZooContext.Users.Where(x => x.RoleId == roleId && x.IsDeleted == false).ToList();
+        users.Reverse();
     }
 
     private void Add()
@@ -304,7 +307,8 @@
             DivissionCode = divissionCode,
             IssuedDate = issueDate,
             BirthDate = birthDate,
-            GenderId = crntGender
+            GenderId = crntGender,
+            IsDeleted = false
         };
 
         ZooContext.Users.Add(newUser);

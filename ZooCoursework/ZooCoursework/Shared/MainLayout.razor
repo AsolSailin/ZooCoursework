@@ -71,7 +71,11 @@
 
     private void GetAccount() => Navigation.NavigateTo("/account");
 
-    private void Exit() => Navigation.NavigateTo("/authorization");
+    private void Exit()
+    {
+        CurrentElement.CurrentUser = null;
+        Navigation.NavigateTo("/authorization");
+    }
 
     private readonly MudTheme _currentTheme = new()
         {

@@ -85,19 +85,19 @@
             <div class="fieldsBlock">
                 <div>
                     <MudText Class="labelText">Должность сотрудника</MudText>
-                    <input @bind-value="currentRole.Title" />
+                    <input @bind-value="currentRole.Title" readonly="true"/>
                 </div>
                 <div>
                     <MudText Class="labelText">Фамилия</MudText>
-                    <input @bind-value="currentUser.Surname" />
+                    <input @bind-value="currentUser.Surname" readonly="true" />
                 </div>
                 <div>
                     <MudText Class="labelText">Имя</MudText>
-                    <input @bind-value="currentUser.Name" />
+                    <input @bind-value="currentUser.Name" readonly="true" />
                 </div>
                 <div>
                     <MudText Class="labelText">Отчество</MudText>
-                    <input @bind-value="currentUser.Patronymic" />
+                    <input @bind-value="currentUser.Patronymic" readonly="true" />
                 </div>
 
             </div>
